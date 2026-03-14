@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>API Reference — DockEase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:          #0a0a0f;
+      --bg-card:     #111118;
+      --bg-code:     #0d1117;
+      --border:      #1e1e2e;
+      --border-light:#2a2a3d;
+      --text:        #e2e8f0;
+      --text-muted:  #94a3b8;
+      --text-faint:  #64748b;
+      --indigo:      #6366f1;
+      --indigo-light:#818cf8;
+      --indigo-dim:  #312e81;
+      --green:       #10b981;
+      --amber:       #f59e0b;
+      --red:         #ef4444;
+      --radius:      10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .page-wrapper { display:flex; min-height:100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      width: 260px; min-width: 260px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 32px 0 48px;
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      display:flex; align-items:center; gap:10px;
+      padding: 0 24px 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .sidebar-logo .logo-mark {
+      width:32px; height:32px; border-radius:8px;
+      background: linear-gradient(135deg, var(--indigo), #8b5cf6);
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; font-weight:700; color:#fff; letter-spacing:-0.5px;
+      flex-shrink:0;
+    }
+    .sidebar-logo .logo-text { font-size:17px; font-weight:700; color:#fff; letter-spacing:-0.3px; }
+    .sidebar-logo .logo-sub  { font-size:10px; color: var(--text-faint); text-transform:uppercase; letter-spacing:1px; }
+    .sidebar-nav { padding: 0 12px; }
+    .sidebar-nav a {
+      display:block; padding:6px 12px; border-radius:6px;
+      color: var(--text-muted); text-decoration:none; font-size:13px;
+      transition: all .15s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .sidebar-nav a:hover { background: rgba(99,102,241,.12); color: var(--indigo-light); }
+    .sidebar-nav .nav-h1 { font-weight:600; color:var(--text); font-size:13px; margin-top:4px; }
+    .sidebar-nav .nav-h2 { padding-left:20px; font-size:12px; }
+    .sidebar-nav .nav-h3 { padding-left:32px; font-size:11.5px; color:var(--text-faint); }
+
+    /* Content */
+    .content {
+      flex:1; min-width:0;
+      padding: 48px 64px 96px;
+      max-width: 900px;
+    }
+
+    /* Header band */
+    .doc-header {
+      margin-bottom:48px; padding-bottom:32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-header .tag {
+      display:inline-block; margin-bottom:12px;
+      font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+      color: var(--indigo-light); background: rgba(99,102,241,.12);
+      padding:4px 10px; border-radius:20px;
+    }
+    .doc-header h1 {
+      font-size:36px; font-weight:700; letter-spacing:-0.8px; line-height:1.2;
+      color:#fff; margin-bottom:12px;
+    }
+    .doc-header .subtitle {
+      font-size:15px; color:var(--text-muted); max-width:600px; line-height:1.6;
+    }
+    .doc-header .meta {
+      margin-top:16px; font-size:12px; color:var(--text-faint);
+      display:flex; gap:20px; flex-wrap:wrap;
+    }
+    .doc-header .meta span { display:flex; align-items:center; gap:5px; }
+
+    /* Typography */
+    h1,h2,h3,h4,h5,h6 { color:#fff; font-weight:600; letter-spacing:-0.3px; line-height:1.3; }
+    h1 { font-size:28px; margin:48px 0 16px; padding-top:8px; }
+    h2 {
+      font-size:20px; margin:40px 0 14px;
+      padding-bottom:8px; border-bottom:1px solid var(--border);
+    }
+    h3 { font-size:16px; margin:28px 0 10px; color:var(--indigo-light); }
+    h4 { font-size:14px; margin:20px 0 8px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+    p  { margin-bottom:14px; color:var(--text); }
+    a  { color:var(--indigo-light); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    strong { color:#fff; font-weight:600; }
+    em     { color:var(--text-muted); font-style:italic; }
+
+    ul,ol { margin:0 0 16px 24px; }
+    li { margin-bottom:6px; color:var(--text); }
+    li > ul, li > ol { margin-top:6px; margin-bottom:4px; }
+
+    /* Blockquote */
+    blockquote {
+      margin:20px 0; padding:14px 20px;
+      border-left:3px solid var(--indigo);
+      background:rgba(99,102,241,.07);
+      border-radius:0 var(--radius) var(--radius) 0;
+    }
+    blockquote p { margin:0; color:var(--text-muted); font-style:italic; }
+
+    /* Code */
+    code {
+      font-family:'JetBrains Mono', 'Fira Code', monospace;
+      font-size:13px; background:rgba(99,102,241,.1);
+      color:var(--indigo-light); padding:2px 6px; border-radius:4px;
+    }
+    pre {
+      background:var(--bg-code);
+      border:1px solid var(--border-light);
+      border-radius:var(--radius);
+      padding:20px 24px; overflow-x:auto;
+      margin:20px 0; position:relative;
+    }
+    pre code {
+      background:none; color:#e2e8f0;
+      padding:0; border-radius:0; font-size:13px; line-height:1.65;
+    }
+    .code-lang {
+      position:absolute; top:10px; right:14px;
+      font-size:10px; font-family:'JetBrains Mono',monospace;
+      color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px;
+    }
+
+    /* Tables */
+    .table-wrap { overflow-x:auto; margin:20px 0; border-radius:var(--radius); border:1px solid var(--border); }
+    table { border-collapse:collapse; width:100%; font-size:13.5px; }
+    thead { background:rgba(99,102,241,.08); }
+    th {
+      padding:10px 16px; text-align:left; font-weight:600;
+      color:var(--text-muted); font-size:12px; text-transform:uppercase; letter-spacing:.5px;
+      border-bottom:1px solid var(--border);
+    }
+    td { padding:10px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,.02); }
+
+    /* HR */
+    hr { border:none; border-top:1px solid var(--border); margin:32px 0; }
+
+    /* Callout boxes */
+    .callout { margin:20px 0; padding:14px 18px; border-radius:var(--radius); border-left:3px solid; }
+    .callout-note  { background:rgba(99,102,241,.07); border-color:var(--indigo);  }
+    .callout-warn  { background:rgba(245,158,11,.07); border-color:var(--amber);   }
+    .callout-tip   { background:rgba(16,185,129,.07); border-color:var(--green);   }
+    .callout-title { font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .callout-note  .callout-title { color:var(--indigo-light); }
+    .callout-warn  .callout-title { color:var(--amber); }
+    .callout-tip   .callout-title { color:var(--green); }
+
+    /* Badge chips */
+    .badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
+    .badge-green  { background:rgba(16,185,129,.15); color:var(--green); }
+    .badge-indigo { background:rgba(99,102,241,.15); color:var(--indigo-light); }
+    .badge-amber  { background:rgba(245,158,11,.15); color:var(--amber); }
+
+    /* Footer */
+    .doc-footer {
+      margin-top:64px; padding-top:24px; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    }
+    .doc-footer .brand { font-size:13px; color:var(--text-faint); }
+    .doc-footer .brand strong { color:var(--indigo-light); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border-light); border-radius:3px; }
+
+    /* Print / PDF */
+    @media print {
+      .sidebar { display:none; }
+      .content { padding:32px 40px; max-width:100%; }
+      body { background:#fff; color:#000; }
+      h1,h2,h3,h4 { color:#000; }
+      code { background:#f1f5f9; color:#3730a3; }
+      pre  { background:#f8fafc; border-color:#e2e8f0; }
+      pre code { color:#1e293b; }
+      td,th { color:#000; }
+      a { color:#4338ca; }
+      .doc-footer { color:#64748b; }
+    }
+    @page { margin:2cm 2.5cm; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">D</div>
+      <div>
+        <div class="logo-text">DockEase</div>
+        <div class="logo-sub">Documentation</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="#table-of-contents" class="nav-h2">Table of Contents</a>
+      <a href="#authentication" class="nav-h2">Authentication</a>
+      <a href="#bearer-jwt-session-based" class="nav-h3">Bearer JWT (Session-based)</a>
+      <a href="#api-key-proenterprise" class="nav-h3">API Key (Pro/Enterprise)</a>
+      <a href="#rate-limiting" class="nav-h2">Rate Limiting</a>
+      <a href="#pagination" class="nav-h2">Pagination</a>
+      <a href="#error-format" class="nav-h2">Error Format</a>
+      <a href="#common-http-status-codes" class="nav-h3">Common HTTP Status Codes</a>
+      <a href="#auth-endpoints" class="nav-h2">Auth Endpoints</a>
+      <a href="#post-apiv1authregister" class="nav-h3">POST /api/v1/auth/register/</a>
+      <a href="#post-apiv1authlogin" class="nav-h3">POST /api/v1/auth/login/</a>
+      <a href="#post-apiv1authtokenrefresh" class="nav-h3">POST /api/v1/auth/token/refresh/</a>
+      <a href="#post-apiv1authlogout" class="nav-h3">POST /api/v1/auth/logout/</a>
+      <a href="#get-apiv1authme" class="nav-h3">GET /api/v1/auth/me/</a>
+      <a href="#patch-apiv1authme" class="nav-h3">PATCH /api/v1/auth/me/</a>
+      <a href="#post-apiv1authverify-email" class="nav-h3">POST /api/v1/auth/verify-email/</a>
+      <a href="#post-apiv1authverify-emailresend" class="nav-h3">POST /api/v1/auth/verify-email/resend/</a>
+      <a href="#post-apiv1authpasswordchange" class="nav-h3">POST /api/v1/auth/password/change/</a>
+      <a href="#post-apiv1authpasswordreset" class="nav-h3">POST /api/v1/auth/password/reset/</a>
+      <a href="#post-apiv1authpasswordresetconfirm" class="nav-h3">POST /api/v1/auth/password/reset/confirm/</a>
+      <a href="#delete-apiv1authaccount" class="nav-h3">DELETE /api/v1/auth/account/</a>
+      <a href="#get-apiv1authapi-key" class="nav-h3">GET /api/v1/auth/api-key/</a>
+      <a href="#post-apiv1authapi-key" class="nav-h3">POST /api/v1/auth/api-key/</a>
+      <a href="#delete-apiv1authapi-key" class="nav-h3">DELETE /api/v1/auth/api-key/</a>
+      <a href="#get-apiv1authwebhook" class="nav-h3">GET /api/v1/auth/webhook/</a>
+      <a href="#patch-apiv1authwebhook" class="nav-h3">PATCH /api/v1/auth/webhook/</a>
+      <a href="#get-apiv1authaudit-log" class="nav-h3">GET /api/v1/auth/audit-log/</a>
+      <a href="#project-endpoints" class="nav-h2">Project Endpoints</a>
+      <a href="#get-apiv1projects" class="nav-h3">GET /api/v1/projects/</a>
+      <a href="#post-apiv1projects" class="nav-h3">POST /api/v1/projects/</a>
+      <a href="#get-apiv1projectsid" class="nav-h3">GET /api/v1/projects/{id}/</a>
+      <a href="#patch-apiv1projectsid" class="nav-h3">PATCH /api/v1/projects/{id}/</a>
+      <a href="#delete-apiv1projectsid" class="nav-h3">DELETE /api/v1/projects/{id}/</a>
+      <a href="#receptor-endpoints" class="nav-h2">Receptor Endpoints</a>
+      <a href="#post-apiv1receptors" class="nav-h3">POST /api/v1/receptors/</a>
+      <a href="#post-apiv1receptorsfetch-pdb" class="nav-h3">POST /api/v1/receptors/fetch-pdb/</a>
+      <a href="#delete-apiv1receptorsbulk-delete" class="nav-h3">DELETE /api/v1/receptors/bulk-delete/</a>
+      <a href="#get-apiv1receptorsid" class="nav-h3">GET /api/v1/receptors/{id}/</a>
+      <a href="#delete-apiv1receptorsid" class="nav-h3">DELETE /api/v1/receptors/{id}/</a>
+      <a href="#get-apiv1receptorsidbinding-sites" class="nav-h3">GET /api/v1/receptors/{id}/binding-sites/</a>
+      <a href="#post-apiv1receptorsiddetect-sites" class="nav-h3">POST /api/v1/receptors/{id}/detect-sites/</a>
+      <a href="#get-apiv1receptorsidcalibrate" class="nav-h3">GET /api/v1/receptors/{id}/calibrate/</a>
+      <a href="#post-apiv1receptorsidcalibrate" class="nav-h3">POST /api/v1/receptors/{id}/calibrate/</a>
+      <a href="#get-apiv1receptorsidcalibrations" class="nav-h3">GET /api/v1/receptors/{id}/calibrations/</a>
+      <a href="#get-apiv1calibrationsid" class="nav-h3">GET /api/v1/calibrations/{id}/</a>
+      <a href="#ligand-endpoints" class="nav-h2">Ligand Endpoints</a>
+      <a href="#post-apiv1ligands" class="nav-h3">POST /api/v1/ligands/</a>
+      <a href="#post-apiv1ligandsfrom-smiles" class="nav-h3">POST /api/v1/ligands/from-smiles/</a>
+      <a href="#post-apiv1ligandsfrom-pubchem" class="nav-h3">POST /api/v1/ligands/from-pubchem/</a>
+      <a href="#delete-apiv1ligandsbulk-delete" class="nav-h3">DELETE /api/v1/ligands/bulk-delete/</a>
+      <a href="#get-apiv1ligandsid" class="nav-h3">GET /api/v1/ligands/{id}/</a>
+      <a href="#delete-apiv1ligandsid" class="nav-h3">DELETE /api/v1/ligands/{id}/</a>
+      <a href="#get-apiv1ligandsid2d-depiction" class="nav-h3">GET /api/v1/ligands/{id}/2d-depiction/</a>
+      <a href="#get-apiv1ligandsidattachable-atoms" class="nav-h3">GET /api/v1/ligands/{id}/attachable-atoms/</a>
+      <a href="#job-endpoints" class="nav-h2">Job Endpoints</a>
+      <a href="#get-apiv1jobs" class="nav-h3">GET /api/v1/jobs/</a>
+      <a href="#post-apiv1jobs" class="nav-h3">POST /api/v1/jobs/</a>
+      <a href="#get-apiv1jobsid" class="nav-h3">GET /api/v1/jobs/{id}/</a>
+      <a href="#delete-apiv1jobsid" class="nav-h3">DELETE /api/v1/jobs/{id}/</a>
+      <a href="#get-apiv1jobsidresults" class="nav-h3">GET /api/v1/jobs/{id}/results/</a>
+      <a href="#get-apiv1jobsidresultsexport" class="nav-h3">GET /api/v1/jobs/{id}/results/export/</a>
+      <a href="#post-apiv1jobsidretry" class="nav-h3">POST /api/v1/jobs/{id}/retry/</a>
+      <a href="#get-apiv1resultsidadmet" class="nav-h3">GET /api/v1/results/{id}/admet/</a>
+      <a href="#post-apiv1resultsidadmet" class="nav-h3">POST /api/v1/results/{id}/admet/</a>
+      <a href="#post-apiv1resultsidfragment-grow" class="nav-h3">POST /api/v1/results/{id}/fragment-grow/</a>
+      <a href="#get-apiv1fragment-growid" class="nav-h3">GET /api/v1/fragment-grow/{id}/</a>
+      <a href="#billing-endpoints" class="nav-h2">Billing Endpoints</a>
+      <a href="#get-apiv1billingsubscription" class="nav-h3">GET /api/v1/billing/subscription/</a>
+      <a href="#post-apiv1billingcheckout" class="nav-h3">POST /api/v1/billing/checkout/</a>
+      <a href="#get-apiv1billingtransactions" class="nav-h3">GET /api/v1/billing/transactions/</a>
+      <a href="#get-apiv1billingusage" class="nav-h3">GET /api/v1/billing/usage/</a>
+      <a href="#organization-endpoints" class="nav-h2">Organization Endpoints</a>
+      <a href="#get-apiv1orgs" class="nav-h3">GET /api/v1/orgs/</a>
+      <a href="#post-apiv1orgs" class="nav-h3">POST /api/v1/orgs/</a>
+      <a href="#get-apiv1orgsid" class="nav-h3">GET /api/v1/orgs/{id}/</a>
+      <a href="#patch-apiv1orgsid" class="nav-h3">PATCH /api/v1/orgs/{id}/</a>
+      <a href="#delete-apiv1orgsid" class="nav-h3">DELETE /api/v1/orgs/{id}/</a>
+      <a href="#get-apiv1orgsidmembers" class="nav-h3">GET /api/v1/orgs/{id}/members/</a>
+      <a href="#post-apiv1orgsidinvite" class="nav-h3">POST /api/v1/orgs/{id}/invite/</a>
+      <a href="#post-apiv1orgsaccept-invitetoken" class="nav-h3">POST /api/v1/orgs/accept-invite/{token}/</a>
+      <a href="#websocket-protocol" class="nav-h2">WebSocket Protocol</a>
+      <a href="#connection" class="nav-h3">Connection</a>
+      <a href="#connection-lifecycle" class="nav-h3">Connection Lifecycle</a>
+      <a href="#message-types" class="nav-h3">Message Types</a>
+      <a href="#reconnection" class="nav-h3">Reconnection</a>
+    </div>
+  </nav>
+  <main class="content">
+    <div class="doc-header">
+      <div class="tag">DockEase Docs</div>
+      <h1>API Reference</h1>
+      <div class="meta">
+        <span>&#128197; March 14, 2026</span>
+        <span>&#128196; v1.0</span>
+      </div>
+    </div>
+<blockquote><p><strong>API Version:</strong> v1 | <strong>Base URL:</strong> <code>https://api.dockease.io/api/v1</code></p></blockquote>
+<hr/>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#authentication">Authentication</a></li>
+<li><a href="#rate-limiting">Rate Limiting</a></li>
+<li><a href="#pagination">Pagination</a></li>
+<li><a href="#error-format">Error Format</a></li>
+<li><a href="#auth-endpoints">Auth Endpoints</a></li>
+<li><a href="#project-endpoints">Project Endpoints</a></li>
+<li><a href="#receptor-endpoints">Receptor Endpoints</a></li>
+<li><a href="#ligand-endpoints">Ligand Endpoints</a></li>
+<li><a href="#job-endpoints">Job Endpoints</a></li>
+<li><a href="#billing-endpoints">Billing Endpoints</a></li>
+<li><a href="#organization-endpoints">Organization Endpoints</a></li>
+<li><a href="#websocket-protocol">WebSocket Protocol</a></li>
+</ol>
+<hr/>
+<h2 id="authentication">Authentication</h2>
+<p>DockEase supports two authentication methods:</p>
+<h3 id="bearer-jwt-session-based">Bearer JWT (Session-based)</h3>
+<p>Obtain a JWT pair by calling <code>POST /api/v1/auth/login/</code>. Include the access token in all subsequent requests:</p>
+<pre><code>Authorization: Bearer &lt;access_token&gt;</code></pre>
+<p>Access tokens expire after <strong>15 minutes</strong>. Use the refresh endpoint to obtain a new access token using a valid refresh token. Refresh tokens expire after <strong>7 days</strong>.</p>
+<h3 id="api-key-proenterprise">API Key (Pro/Enterprise)</h3>
+<p>Generate an API key from your account settings. Pass the key as a header:</p>
+<pre><code>X-API-Key: dk_live_xxxxxxxxxxxxxxxxxxxxxxxx</code></pre>
+<p>API keys do not expire but can be revoked from the dashboard. They carry the same permissions as the owning user account.</p>
+<hr/>
+<h2 id="rate-limiting">Rate Limiting</h2>
+<p>All endpoints are rate-limited. Exceeding limits returns HTTP <code>429 Too Many Requests</code> with a <code>Retry-After</code> header.</p>
+<div class="table-wrap"><table><thead><tr><th>Scope</th><th>Limit</th><th>Window</th></tr></thead><tbody><tr><td>Login (<code>POST /auth/login/</code>)</td><td>5 requests</td><td>1 minute</td></tr><tr><td>Password reset (<code>POST /auth/password/reset/</code>)</td><td>5 requests</td><td>1 hour</td></tr><tr><td>Anonymous (unauthenticated)</td><td>60 requests</td><td>1 minute</td></tr><tr><td>Authenticated user</td><td>600 requests</td><td>1 minute</td></tr><tr><td>API key (Pro)</td><td>600 requests</td><td>1 minute</td></tr><tr><td>API key (Enterprise)</td><td>3000 requests</td><td>1 minute</td></tr></tbody></table></div>
+<hr/>
+<h2 id="pagination">Pagination</h2>
+<p>List endpoints return paginated results in the following format:</p>
+<pre><span class="code-lang">json</span><code>{
+  "count": 142,
+  "next": "https://api.dockease.io/api/v1/jobs/?page=3",
+  "previous": "https://api.dockease.io/api/v1/jobs/?page=1",
+  "results": [ ... ]
+}</code></pre>
+<p>Pagination parameters:</p>
+<div class="table-wrap"><table><thead><tr><th>Parameter</th><th>Type</th><th>Default</th><th>Description</th></tr></thead><tbody><tr><td><code>page</code></td><td>integer</td><td>1</td><td>Page number (1-indexed)</td></tr><tr><td><code>page_size</code></td><td>integer</td><td>20</td><td>Results per page (max: 100)</td></tr></tbody></table></div>
+<hr/>
+<h2 id="error-format">Error Format</h2>
+<p>All errors return a consistent JSON structure:</p>
+<pre><span class="code-lang">json</span><code>{
+  "error": {
+    "code": "RECEPTOR_NOT_FOUND",
+    "message": "Receptor with id 'abc123' does not exist or you do not have permission to access it.",
+    "details": {}
+  }
+}</code></pre>
+<h3 id="common-http-status-codes">Common HTTP Status Codes</h3>
+<div class="table-wrap"><table><thead><tr><th>Code</th><th>Meaning</th></tr></thead><tbody><tr><td><code>200 OK</code></td><td>Successful GET, PATCH</td></tr><tr><td><code>201 Created</code></td><td>Successful POST</td></tr><tr><td><code>204 No Content</code></td><td>Successful DELETE</td></tr><tr><td><code>400 Bad Request</code></td><td>Validation error — check <code>error.details</code></td></tr><tr><td><code>401 Unauthorized</code></td><td>Missing or invalid authentication</td></tr><tr><td><code>403 Forbidden</code></td><td>Authenticated but insufficient permissions</td></tr><tr><td><code>404 Not Found</code></td><td>Resource does not exist</td></tr><tr><td><code>409 Conflict</code></td><td>State conflict (e.g., deleting a running job)</td></tr><tr><td><code>429 Too Many Requests</code></td><td>Rate limit exceeded</td></tr><tr><td><code>500 Internal Server Error</code></td><td>Server error — contact support</td></tr></tbody></table></div>
+<hr/>
+<h2 id="auth-endpoints">Auth Endpoints</h2>
+<h3 id="post-apiv1authregister">POST /api/v1/auth/register/</h3>
+<p>Create a new user account.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "email": "researcher@university.edu",
+  "password": "SecurePassphrase123!",
+  "full_name": "Dr. Jane Smith",
+  "affiliation": "University of Cambridge"
+}</code></pre>
+<p><strong>Response <code>201</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "usr_01HN8K3DFQX",
+  "email": "researcher@university.edu",
+  "full_name": "Dr. Jane Smith",
+  "email_verified": false,
+  "created_at": "2026-03-14T10:23:41Z"
+}</code></pre>
+<p><strong>Error Codes:</strong></p>
+<ul>
+<li><code>EMAIL_ALREADY_EXISTS</code> (400) — An account with this email already exists</li>
+<li><code>WEAK_PASSWORD</code> (400) — Password does not meet complexity requirements</li>
+</ul>
+<hr/>
+<h3 id="post-apiv1authlogin">POST /api/v1/auth/login/</h3>
+<p>Authenticate and receive JWT tokens.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "email": "researcher@university.edu",
+  "password": "SecurePassphrase123!"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "id": "usr_01HN8K3DFQX",
+    "email": "researcher@university.edu",
+    "full_name": "Dr. Jane Smith",
+    "plan": "pro",
+    "jobs_used_this_month": 47,
+    "jobs_limit": 500
+  }
+}</code></pre>
+<p><strong>Error Codes:</strong></p>
+<ul>
+<li><code>INVALID_CREDENTIALS</code> (401)</li>
+<li><code>EMAIL_NOT_VERIFIED</code> (403)</li>
+<li><code>ACCOUNT_SUSPENDED</code> (403)</li>
+</ul>
+<p><strong>curl example:</strong></p>
+<pre><span class="code-lang">bash</span><code>curl -X POST https://api.dockease.io/api/v1/auth/login/ \
+  -H "Content-Type: application/json" \
+  -d '{"email":"researcher@university.edu","password":"SecurePassphrase123!"}'</code></pre>
+<p><strong>Python example:</strong></p>
+<pre><span class="code-lang">python</span><code>import requests
+
+resp = requests.post(
+    "https://api.dockease.io/api/v1/auth/login/",
+    json={"email": "researcher@university.edu", "password": "SecurePassphrase123!"}
+)
+tokens = resp.json()
+access_token = tokens["access"]</code></pre>
+<hr/>
+<h3 id="post-apiv1authtokenrefresh">POST /api/v1/auth/token/refresh/</h3>
+<p>Exchange a refresh token for a new access token.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "access": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</code></pre>
+<hr/>
+<h3 id="post-apiv1authlogout">POST /api/v1/auth/logout/</h3>
+<p>Blacklist the refresh token (server-side logout).</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "refresh": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}</code></pre>
+<p><strong>Response <code>204</code>:</strong> No content.</p>
+<hr/>
+<h3 id="get-apiv1authme">GET /api/v1/auth/me/</h3>
+<p>Retrieve the authenticated user's profile.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "usr_01HN8K3DFQX",
+  "email": "researcher@university.edu",
+  "full_name": "Dr. Jane Smith",
+  "affiliation": "University of Cambridge",
+  "plan": "pro",
+  "email_verified": true,
+  "jobs_used_this_month": 47,
+  "jobs_limit": 500,
+  "created_at": "2026-01-15T08:00:00Z"
+}</code></pre>
+<h3 id="patch-apiv1authme">PATCH /api/v1/auth/me/</h3>
+<p>Update profile fields. All fields are optional.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "full_name": "Dr. Jane M. Smith",
+  "affiliation": "Wellcome Sanger Institute"
+}</code></pre>
+<hr/>
+<h3 id="post-apiv1authverify-email">POST /api/v1/auth/verify-email/</h3>
+<p>Verify email with the token from the verification email.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "token": "abc123verificationtoken"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "detail": "Email verified successfully."
+}</code></pre>
+<hr/>
+<h3 id="post-apiv1authverify-emailresend">POST /api/v1/auth/verify-email/resend/</h3>
+<p>Resend the verification email.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "email": "researcher@university.edu"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong> <code>{"detail": "Verification email sent."}</code></p>
+<hr/>
+<h3 id="post-apiv1authpasswordchange">POST /api/v1/auth/password/change/</h3>
+<p>Change password for authenticated users.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "current_password": "OldPassword123!",
+  "new_password": "NewSecurePassphrase456!"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong> <code>{"detail": "Password changed successfully."}</code></p>
+<hr/>
+<h3 id="post-apiv1authpasswordreset">POST /api/v1/auth/password/reset/</h3>
+<p>Initiate password reset (unauthenticated).</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "email": "researcher@university.edu"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong> <code>{"detail": "If that email exists, a reset link has been sent."}</code> (always returns 200 to prevent email enumeration)</p>
+<hr/>
+<h3 id="post-apiv1authpasswordresetconfirm">POST /api/v1/auth/password/reset/confirm/</h3>
+<p>Complete password reset with token from email.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "token": "password-reset-token-from-email",
+  "uid": "user-uid-from-email",
+  "new_password": "NewSecurePassphrase456!"
+}</code></pre>
+<hr/>
+<h3 id="delete-apiv1authaccount">DELETE /api/v1/auth/account/</h3>
+<p>Permanently delete the account and all associated data (GDPR erasure). Requires password confirmation.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "password": "SecurePassphrase123!",
+  "confirmation": "DELETE MY ACCOUNT"
+}</code></pre>
+<p><strong>Response <code>204</code>:</strong> No content.</p>
+<hr/>
+<h3 id="get-apiv1authapi-key">GET /api/v1/auth/api-key/</h3>
+<p>Retrieve current API key metadata (key value is masked).</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "key_prefix": "dk_live_xxxx",
+  "created_at": "2026-02-01T12:00:00Z",
+  "last_used_at": "2026-03-13T09:15:00Z",
+  "is_active": true
+}</code></pre>
+<h3 id="post-apiv1authapi-key">POST /api/v1/auth/api-key/</h3>
+<p>Generate a new API key (replaces existing).</p>
+<p><strong>Response <code>201</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "key": "dk_live_abcdefghijklmnopqrstuvwxyz123456",
+  "note": "This key is shown only once. Store it securely."
+}</code></pre>
+<h3 id="delete-apiv1authapi-key">DELETE /api/v1/auth/api-key/</h3>
+<p>Revoke the current API key.</p>
+<p><strong>Response <code>204</code>:</strong> No content.</p>
+<hr/>
+<h3 id="get-apiv1authwebhook">GET /api/v1/auth/webhook/</h3>
+<p>Retrieve webhook configuration.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "url": "https://your-server.com/hooks/dockease",
+  "events": ["job.completed", "job.failed"],
+  "is_active": true,
+  "secret_prefix": "whsec_xxxx"
+}</code></pre>
+<h3 id="patch-apiv1authwebhook">PATCH /api/v1/auth/webhook/</h3>
+<p>Update webhook configuration.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "url": "https://your-server.com/hooks/dockease",
+  "events": ["job.completed", "job.failed", "job.queued"],
+  "is_active": true
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1authaudit-log">GET /api/v1/auth/audit-log/</h3>
+<p>Retrieve audit log entries (Pro/Enterprise only). Returns paginated list.</p>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>action</code> — filter by action type (e.g., <code>job.created</code>, <code>receptor.deleted</code>)</li>
+<li><code>from_date</code> — ISO 8601 date</li>
+<li><code>to_date</code> — ISO 8601 date</li>
+</ul>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "count": 312,
+  "next": "...",
+  "previous": null,
+  "results": [
+    {
+      "id": "log_01HP9X",
+      "action": "job.created",
+      "resource_type": "job",
+      "resource_id": "job_01HQ2X",
+      "user_email": "researcher@university.edu",
+      "ip_address": "203.0.113.42",
+      "timestamp": "2026-03-14T11:00:00Z",
+      "metadata": {}
+    }
+  ]
+}</code></pre>
+<hr/>
+<h2 id="project-endpoints">Project Endpoints</h2>
+<h3 id="get-apiv1projects">GET /api/v1/projects/</h3>
+<p>List all projects accessible to the authenticated user.</p>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>status</code> — <code>active</code> (default) | <code>archived</code></li>
+<li><code>search</code> — search by name</li>
+</ul>
+<p><strong>Response <code>200</code>:</strong> Paginated list of project objects.</p>
+<pre><span class="code-lang">json</span><code>{
+  "count": 5,
+  "results": [
+    {
+      "id": "proj_01HN9X",
+      "name": "EGFR Inhibitor Screen",
+      "description": "Fragment screen against EGFR kinase domain",
+      "status": "active",
+      "receptor_count": 3,
+      "ligand_count": 450,
+      "job_count": 12,
+      "created_at": "2026-01-20T09:00:00Z",
+      "updated_at": "2026-03-14T10:00:00Z"
+    }
+  ]
+}</code></pre>
+<h3 id="post-apiv1projects">POST /api/v1/projects/</h3>
+<p>Create a new project.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "name": "CDK2 Fragment Screen",
+  "description": "Virtual screening campaign for CDK2 inhibitors",
+  "org_id": null
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1projectsid">GET /api/v1/projects/{id}/</h3>
+<p>Retrieve a single project.</p>
+<h3 id="patch-apiv1projectsid">PATCH /api/v1/projects/{id}/</h3>
+<p>Update project name, description, or status.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "name": "CDK2 Fragment Screen - Phase 2",
+  "status": "archived"
+}</code></pre>
+<h3 id="delete-apiv1projectsid">DELETE /api/v1/projects/{id}/</h3>
+<p>Permanently delete a project and all contents.</p>
+<p><strong>Response <code>204</code>:</strong> No content.</p>
+<hr/>
+<h2 id="receptor-endpoints">Receptor Endpoints</h2>
+<h3 id="post-apiv1receptors">POST /api/v1/receptors/</h3>
+<p>Upload a receptor file.</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code></p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>file</code></td><td>file</td><td>Yes</td><td>PDB or PDBQT file (max 50 MB)</td></tr><tr><td><code>name</code></td><td>string</td><td>No</td><td>Display name</td></tr><tr><td><code>project_id</code></td><td>string</td><td>Yes</td><td>Parent project ID</td></tr><tr><td><code>notes</code></td><td>string</td><td>No</td><td>Free-text notes</td></tr></tbody></table></div>
+<p><strong>Response <code>201</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "rec_01HN8KX",
+  "name": "EGFR_2ITO",
+  "project_id": "proj_01HN9X",
+  "status": "preparing",
+  "file_format": "pdb",
+  "file_size_bytes": 182540,
+  "notes": "",
+  "created_at": "2026-03-14T11:00:00Z"
+}</code></pre>
+<p><strong>curl example:</strong></p>
+<pre><span class="code-lang">bash</span><code>curl -X POST https://api.dockease.io/api/v1/receptors/ \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/path/to/egfr.pdb" \
+  -F "name=EGFR_2ITO" \
+  -F "project_id=proj_01HN9X"</code></pre>
+<hr/>
+<h3 id="post-apiv1receptorsfetch-pdb">POST /api/v1/receptors/fetch-pdb/</h3>
+<p>Fetch a receptor directly from RCSB PDB.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "pdb_id": "2ITO",
+  "project_id": "proj_01HN9X",
+  "name": "EGFR_2ITO"
+}</code></pre>
+<p><strong>Response <code>201</code>:</strong> Same schema as receptor upload.</p>
+<hr/>
+<h3 id="delete-apiv1receptorsbulk-delete">DELETE /api/v1/receptors/bulk-delete/</h3>
+<p>Delete multiple receptors at once.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "ids": ["rec_01HN8KX", "rec_02HN8KX"]
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "deleted": 2,
+  "failed": []
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1receptorsid">GET /api/v1/receptors/{id}/</h3>
+<p>Retrieve receptor details.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "rec_01HN8KX",
+  "name": "EGFR_2ITO",
+  "project_id": "proj_01HN9X",
+  "status": "ready",
+  "file_format": "pdb",
+  "pdbqt_ready": true,
+  "chain_count": 1,
+  "residue_count": 334,
+  "preparation_log": "PDBFixer: fixed 2 missing residues. OpenBabel: PDBQT generated with Gasteiger charges.",
+  "created_at": "2026-03-14T11:00:00Z"
+}</code></pre>
+<h3 id="delete-apiv1receptorsid">DELETE /api/v1/receptors/{id}/</h3>
+<p>Delete a single receptor.</p>
+<hr/>
+<h3 id="get-apiv1receptorsidbinding-sites">GET /api/v1/receptors/{id}/binding-sites/</h3>
+<p>List detected binding sites for this receptor.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>[
+  {
+    "id": "site_01",
+    "name": "Pocket 1",
+    "probability": 0.92,
+    "volume_angstrom3": 487.3,
+    "center": {"x": 22.4, "y": -8.1, "z": 13.7},
+    "size": {"x": 22.0, "y": 20.0, "z": 18.0},
+    "residues": ["LEU858", "THR790", "MET793"]
+  }
+]</code></pre>
+<h3 id="post-apiv1receptorsiddetect-sites">POST /api/v1/receptors/{id}/detect-sites/</h3>
+<p>Trigger P2Rank binding site detection (async). Returns a job ID to poll.</p>
+<p><strong>Response <code>202</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "detection_job_id": "det_01HN8KX",
+  "status": "queued"
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1receptorsidcalibrate">GET /api/v1/receptors/{id}/calibrate/</h3>
+<p>Retrieve calibration results for this receptor.</p>
+<h3 id="post-apiv1receptorsidcalibrate">POST /api/v1/receptors/{id}/calibrate/</h3>
+<p>Start a Score Calibration run.</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code></p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>actives_file</code></td><td>file</td><td>Yes</td><td>SDF file of known active compounds</td></tr><tr><td><code>inactives_file</code></td><td>file</td><td>Yes</td><td>SDF file of known inactive/decoy compounds</td></tr><tr><td><code>binding_site_id</code></td><td>string</td><td>Yes</td><td>Binding site to use</td></tr><tr><td><code>engine</code></td><td>string</td><td>No</td><td>Docking engine (default: <code>vina</code>)</td></tr></tbody></table></div>
+<p><strong>Response <code>202</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "calibration_id": "cal_01HQ2X",
+  "status": "queued",
+  "n_actives": 25,
+  "n_inactives": 75
+}</code></pre>
+<h3 id="get-apiv1receptorsidcalibrations">GET /api/v1/receptors/{id}/calibrations/</h3>
+<p>List all calibration runs for this receptor.</p>
+<h3 id="get-apiv1calibrationsid">GET /api/v1/calibrations/{id}/</h3>
+<p>Retrieve full calibration results.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "cal_01HQ2X",
+  "receptor_id": "rec_01HN8KX",
+  "status": "completed",
+  "auc": 0.847,
+  "optimal_threshold_kcal_mol": -7.8,
+  "sensitivity_at_threshold": 0.84,
+  "specificity_at_threshold": 0.79,
+  "youden_j": 0.63,
+  "roc_curve": {
+    "fpr": [0.0, 0.02, 0.05, "..."],
+    "tpr": [0.0, 0.28, 0.52, "..."],
+    "thresholds": [-12.1, -10.4, -9.2, "..."]
+  },
+  "completed_at": "2026-03-14T12:30:00Z"
+}</code></pre>
+<hr/>
+<h2 id="ligand-endpoints">Ligand Endpoints</h2>
+<h3 id="post-apiv1ligands">POST /api/v1/ligands/</h3>
+<p>Upload a ligand file (SDF or MOL2). Multi-structure files are split automatically.</p>
+<p><strong>Request:</strong> <code>multipart/form-data</code></p>
+<div class="table-wrap"><table><thead><tr><th>Field</th><th>Type</th><th>Required</th><th>Description</th></tr></thead><tbody><tr><td><code>file</code></td><td>file</td><td>Yes</td><td>SDF or MOL2 file (max 20 MB)</td></tr><tr><td><code>project_id</code></td><td>string</td><td>Yes</td><td>Parent project ID</td></tr><tr><td><code>name</code></td><td>string</td><td>No</td><td>Library or compound name</td></tr></tbody></table></div>
+<p><strong>Response <code>201</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "lig_01HN8KX",
+  "name": "compound_001",
+  "project_id": "proj_01HN9X",
+  "smiles": "CC(=O)Oc1ccccc1C(=O)O",
+  "molecular_formula": "C9H8O4",
+  "molecular_weight": 180.16,
+  "status": "ready",
+  "source": "upload",
+  "created_at": "2026-03-14T11:00:00Z"
+}</code></pre>
+<hr/>
+<h3 id="post-apiv1ligandsfrom-smiles">POST /api/v1/ligands/from-smiles/</h3>
+<p>Create a ligand from a SMILES string.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "smiles": "CC(=O)Oc1ccccc1C(=O)O",
+  "name": "Aspirin",
+  "project_id": "proj_01HN9X"
+}</code></pre>
+<p><strong>Python example:</strong></p>
+<pre><span class="code-lang">python</span><code>import requests
+
+headers = {"Authorization": f"Bearer {access_token}"}
+resp = requests.post(
+    "https://api.dockease.io/api/v1/ligands/from-smiles/",
+    json={
+        "smiles": "CC(=O)Oc1ccccc1C(=O)O",
+        "name": "Aspirin",
+        "project_id": "proj_01HN9X"
+    },
+    headers=headers
+)
+ligand = resp.json()
+print(f"Ligand ID: {ligand['id']}, MW: {ligand['molecular_weight']}")</code></pre>
+<hr/>
+<h3 id="post-apiv1ligandsfrom-pubchem">POST /api/v1/ligands/from-pubchem/</h3>
+<p>Import a ligand from PubChem by CID or name.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "cid": 2244,
+  "project_id": "proj_01HN9X"
+}</code></pre>
+<p>OR:</p>
+<pre><span class="code-lang">json</span><code>{
+  "name": "ibuprofen",
+  "project_id": "proj_01HN9X"
+}</code></pre>
+<hr/>
+<h3 id="delete-apiv1ligandsbulk-delete">DELETE /api/v1/ligands/bulk-delete/</h3>
+<p>Delete multiple ligands.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "ids": ["lig_01HN8KX", "lig_02HN8KX"]
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1ligandsid">GET /api/v1/ligands/{id}/</h3>
+<p>Retrieve ligand details.</p>
+<h3 id="delete-apiv1ligandsid">DELETE /api/v1/ligands/{id}/</h3>
+<p>Delete a single ligand.</p>
+<hr/>
+<h3 id="get-apiv1ligandsid2d-depiction">GET /api/v1/ligands/{id}/2d-depiction/</h3>
+<p>Retrieve a 2D SVG depiction of the ligand.</p>
+<p><strong>Response <code>200</code>:</strong> <code>Content-Type: image/svg+xml</code> — SVG string.</p>
+<hr/>
+<h3 id="get-apiv1ligandsidattachable-atoms">GET /api/v1/ligands/{id}/attachable-atoms/</h3>
+<p>Get the list of atoms that can be used as attachment points for Fragment Growing.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "ligand_id": "lig_01HN8KX",
+  "smiles": "CC(=O)Oc1ccccc1C(=O)O",
+  "attachable_atoms": [
+    {
+      "atom_index": 0,
+      "atom_symbol": "C",
+      "description": "Methyl carbon (CH3)",
+      "current_substituents": ["H", "H", "H"]
+    },
+    {
+      "atom_index": 7,
+      "atom_symbol": "C",
+      "description": "Aromatic carbon",
+      "current_substituents": ["H"]
+    }
+  ]
+}</code></pre>
+<hr/>
+<h2 id="job-endpoints">Job Endpoints</h2>
+<h3 id="get-apiv1jobs">GET /api/v1/jobs/</h3>
+<p>List docking jobs.</p>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>project_id</code> — filter by project</li>
+<li><code>status</code> — <code>queued</code> | <code>running</code> | <code>completed</code> | <code>failed</code></li>
+<li><code>from_date</code> — ISO 8601</li>
+<li><code>to_date</code> — ISO 8601</li>
+<li><code>engine</code> — <code>vina</code> | <code>autodock_gpu</code> | <code>unidock</code> | <code>smina</code></li>
+</ul>
+<p><strong>Response <code>200</code>:</strong> Paginated list of job summary objects.</p>
+<hr/>
+<h3 id="post-apiv1jobs">POST /api/v1/jobs/</h3>
+<p>Create and submit a new docking job.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "project_id": "proj_01HN9X",
+  "receptor_id": "rec_01HN8KX",
+  "binding_site_id": "site_01",
+  "ligand_ids": ["lig_01HN8KX", "lig_02HN8KX"],
+  "engine": "vina",
+  "parameters": {
+    "exhaustiveness": 8,
+    "num_poses": 9,
+    "energy_range": 3.0,
+    "seed": 42
+  },
+  "name": "EGFR fragment screen round 1"
+}</code></pre>
+<p><strong>Response <code>201</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "job_01HQ2X",
+  "name": "EGFR fragment screen round 1",
+  "status": "queued",
+  "engine": "vina",
+  "ligand_count": 2,
+  "estimated_duration_seconds": 120,
+  "created_at": "2026-03-14T11:30:00Z",
+  "websocket_url": "wss://api.dockease.io/ws/jobs/job_01HQ2X/?token=eyJ..."
+}</code></pre>
+<p><strong>curl example:</strong></p>
+<pre><span class="code-lang">bash</span><code>curl -X POST https://api.dockease.io/api/v1/jobs/ \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "project_id": "proj_01HN9X",
+    "receptor_id": "rec_01HN8KX",
+    "binding_site_id": "site_01",
+    "ligand_ids": ["lig_01HN8KX"],
+    "engine": "vina",
+    "parameters": {"exhaustiveness": 8, "num_poses": 9}
+  }'</code></pre>
+<hr/>
+<h3 id="get-apiv1jobsid">GET /api/v1/jobs/{id}/</h3>
+<p>Retrieve job status and metadata.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "job_01HQ2X",
+  "name": "EGFR fragment screen round 1",
+  "status": "completed",
+  "engine": "vina",
+  "ligand_count": 2,
+  "progress_percent": 100,
+  "started_at": "2026-03-14T11:31:00Z",
+  "completed_at": "2026-03-14T11:33:42Z",
+  "duration_seconds": 162,
+  "error_message": null,
+  "result_count": 18
+}</code></pre>
+<h3 id="delete-apiv1jobsid">DELETE /api/v1/jobs/{id}/</h3>
+<p>Cancel a queued or running job (cannot delete completed jobs unless you delete the project).</p>
+<hr/>
+<h3 id="get-apiv1jobsidresults">GET /api/v1/jobs/{id}/results/</h3>
+<p>Retrieve docking results for a completed job.</p>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>ordering</code> — <code>affinity</code> (default) | <code>-affinity</code> | <code>rmsd_lb</code> | <code>ligand_name</code></li>
+<li><code>affinity_max</code> — upper bound filter (e.g., <code>-7.5</code> to show only ≤ −7.5 kcal/mol)</li>
+<li><code>ligand_id</code> — filter by a specific ligand</li>
+</ul>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "count": 18,
+  "results": [
+    {
+      "id": "res_01HQ3X",
+      "ligand_id": "lig_01HN8KX",
+      "ligand_name": "compound_001",
+      "pose_rank": 1,
+      "affinity_kcal_mol": -9.2,
+      "rmsd_lb": 0.0,
+      "rmsd_ub": 0.0,
+      "admet_computed": false
+    },
+    {
+      "id": "res_02HQ3X",
+      "ligand_id": "lig_01HN8KX",
+      "ligand_name": "compound_001",
+      "pose_rank": 2,
+      "affinity_kcal_mol": -8.7,
+      "rmsd_lb": 1.23,
+      "rmsd_ub": 2.14,
+      "admet_computed": false
+    }
+  ]
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1jobsidresultsexport">GET /api/v1/jobs/{id}/results/export/</h3>
+<p>Export all results as CSV or SDF.</p>
+<p><strong>Query Parameters:</strong></p>
+<ul>
+<li><code>format</code> — <code>csv</code> (default) | <code>sdf</code></li>
+<li><code>poses</code> — <code>best</code> (default, pose_rank=1 only) | <code>all</code></li>
+</ul>
+<p><strong>Response <code>200</code>:</strong></p>
+<ul>
+<li>CSV: <code>Content-Type: text/csv</code>, <code>Content-Disposition: attachment; filename="results_job_01HQ2X.csv"</code></li>
+<li>SDF: <code>Content-Type: chemical/x-mdl-sdfile</code></li>
+</ul>
+<hr/>
+<h3 id="post-apiv1jobsidretry">POST /api/v1/jobs/{id}/retry/</h3>
+<p>Re-submit a failed job with the same parameters.</p>
+<p><strong>Response <code>201</code>:</strong> New job object.</p>
+<hr/>
+<h3 id="get-apiv1resultsidadmet">GET /api/v1/results/{id}/admet/</h3>
+<p>Retrieve ADMET predictions for a result. Returns cached result if already computed.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "result_id": "res_01HQ3X",
+  "ligand_name": "compound_001",
+  "computed_at": "2026-03-14T12:00:00Z",
+  "absorption": {
+    "caco2_permeability": -4.92,
+    "intestinal_absorption_percent": 93.4,
+    "blood_brain_barrier": false
+  },
+  "distribution": {
+    "vd_steady_state_log": 0.31,
+    "plasma_protein_binding_percent": 74.2
+  },
+  "metabolism": {
+    "cyp1a2_inhibitor": false,
+    "cyp2c9_inhibitor": true,
+    "cyp2c19_inhibitor": false,
+    "cyp2d6_inhibitor": false,
+    "cyp3a4_inhibitor": false
+  },
+  "excretion": {
+    "renal_clearance_log": 0.55
+  },
+  "toxicity": {
+    "herg_inhibitor": false,
+    "ames_mutagenicity": false,
+    "hepatotoxicity": false,
+    "skin_sensitisation": false
+  },
+  "lipinski": {
+    "mw": 180.16,
+    "logp": 1.19,
+    "hbd": 1,
+    "hba": 4,
+    "ro5_compliant": true
+  }
+}</code></pre>
+<h3 id="post-apiv1resultsidadmet">POST /api/v1/results/{id}/admet/</h3>
+<p>Trigger ADMET computation for a result (if not yet computed).</p>
+<p><strong>Response <code>202</code>:</strong> <code>{"status": "queued", "estimated_seconds": 30}</code></p>
+<hr/>
+<h3 id="post-apiv1resultsidfragment-grow">POST /api/v1/results/{id}/fragment-grow/</h3>
+<p>Launch a Fragment Growing job from this docked pose.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "attachment_atom_index": 7,
+  "fragment_ids": null,
+  "engine": "vina",
+  "parameters": {
+    "exhaustiveness": 8,
+    "num_poses": 5
+  }
+}</code></pre>
+<p>Set <code>fragment_ids</code> to <code>null</code> to grow all 24 standard fragments, or pass a list of fragment IDs (e.g., <code>["frag_fluoro", "frag_methyl", "frag_trifluoromethyl"]</code>) to grow a subset.</p>
+<p><strong>Response <code>202</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "fragment_grow_id": "fg_01HR1X",
+  "status": "queued",
+  "n_variants": 24,
+  "parent_result_id": "res_01HQ3X",
+  "parent_affinity_kcal_mol": -9.2
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1fragment-growid">GET /api/v1/fragment-grow/{id}/</h3>
+<p>Retrieve Fragment Growing results.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "id": "fg_01HR1X",
+  "status": "completed",
+  "parent_result_id": "res_01HQ3X",
+  "parent_affinity_kcal_mol": -9.2,
+  "attachment_atom_index": 7,
+  "variants": [
+    {
+      "fragment_id": "frag_fluoro",
+      "fragment_name": "Fluorine",
+      "fragment_smiles": "F",
+      "result_id": "res_fg_01",
+      "affinity_kcal_mol": -10.4,
+      "delta_delta_g": -1.2,
+      "pose_rank": 1
+    },
+    {
+      "fragment_id": "frag_methyl",
+      "fragment_name": "Methyl",
+      "fragment_smiles": "C",
+      "result_id": "res_fg_02",
+      "affinity_kcal_mol": -9.5,
+      "delta_delta_g": -0.3,
+      "pose_rank": 1
+    }
+  ],
+  "completed_at": "2026-03-14T13:00:00Z"
+}</code></pre>
+<hr/>
+<h2 id="billing-endpoints">Billing Endpoints</h2>
+<h3 id="get-apiv1billingsubscription">GET /api/v1/billing/subscription/</h3>
+<p>Retrieve current subscription details.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "plan": "pro",
+  "status": "active",
+  "current_period_start": "2026-03-01T00:00:00Z",
+  "current_period_end": "2026-04-01T00:00:00Z",
+  "jobs_limit": 500,
+  "jobs_used": 47,
+  "gpu_access": true,
+  "api_access": true,
+  "payment_provider": "razorpay",
+  "amount_inr": 3999,
+  "amount_usd": 48
+}</code></pre>
+<hr/>
+<h3 id="post-apiv1billingcheckout">POST /api/v1/billing/checkout/</h3>
+<p>Create a checkout session to upgrade or change plan.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "plan": "pro",
+  "currency": "INR",
+  "payment_provider": "razorpay"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "checkout_url": "https://checkout.razorpay.com/...",
+  "session_id": "sess_01HQ2X"
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1billingtransactions">GET /api/v1/billing/transactions/</h3>
+<p>List billing transactions.</p>
+<p><strong>Response <code>200</code>:</strong> Paginated list of transaction objects.</p>
+<hr/>
+<h3 id="get-apiv1billingusage">GET /api/v1/billing/usage/</h3>
+<p>Get detailed usage statistics for the current period.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "period_start": "2026-03-01T00:00:00Z",
+  "period_end": "2026-04-01T00:00:00Z",
+  "jobs_total": 47,
+  "jobs_limit": 500,
+  "jobs_by_engine": {
+    "vina": 30,
+    "autodock_gpu": 12,
+    "unidock": 5
+  },
+  "storage_used_mb": 2340,
+  "api_calls_total": 1820
+}</code></pre>
+<hr/>
+<h2 id="organization-endpoints">Organization Endpoints</h2>
+<h3 id="get-apiv1orgs">GET /api/v1/orgs/</h3>
+<p>List organisations the user belongs to.</p>
+<h3 id="post-apiv1orgs">POST /api/v1/orgs/</h3>
+<p>Create a new organisation.</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "name": "Smith Lab - Cambridge"
+}</code></pre>
+<hr/>
+<h3 id="get-apiv1orgsid">GET /api/v1/orgs/{id}/</h3>
+<p>Retrieve organisation details.</p>
+<h3 id="patch-apiv1orgsid">PATCH /api/v1/orgs/{id}/</h3>
+<p>Update organisation name or settings. (Owner/Admin only.)</p>
+<h3 id="delete-apiv1orgsid">DELETE /api/v1/orgs/{id}/</h3>
+<p>Delete the organisation. (Owner only.)</p>
+<hr/>
+<h3 id="get-apiv1orgsidmembers">GET /api/v1/orgs/{id}/members/</h3>
+<p>List organisation members.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>[
+  {
+    "user_id": "usr_01HN8K3DFQX",
+    "email": "researcher@university.edu",
+    "full_name": "Dr. Jane Smith",
+    "role": "owner",
+    "joined_at": "2026-01-15T08:00:00Z"
+  },
+  {
+    "user_id": "usr_02HN8K",
+    "email": "phd.student@university.edu",
+    "full_name": "Alex Johnson",
+    "role": "member",
+    "joined_at": "2026-02-01T10:00:00Z"
+  }
+]</code></pre>
+<hr/>
+<h3 id="post-apiv1orgsidinvite">POST /api/v1/orgs/{id}/invite/</h3>
+<p>Invite a user to the organisation. (Admin/Owner only.)</p>
+<p><strong>Request Body:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "email": "newmember@university.edu",
+  "role": "member"
+}</code></pre>
+<p><strong>Response <code>200</code>:</strong> <code>{"detail": "Invitation sent.", "invite_expires_at": "2026-03-21T11:00:00Z"}</code></p>
+<hr/>
+<h3 id="post-apiv1orgsaccept-invitetoken">POST /api/v1/orgs/accept-invite/{token}/</h3>
+<p>Accept an organisation invitation using the token from the email link.</p>
+<p><strong>Response <code>200</code>:</strong></p>
+<pre><span class="code-lang">json</span><code>{
+  "org_id": "org_01HN9X",
+  "org_name": "Smith Lab - Cambridge",
+  "role": "member"
+}</code></pre>
+<hr/>
+<h2 id="websocket-protocol">WebSocket Protocol</h2>
+<p>DockEase uses WebSockets to stream real-time job progress.</p>
+<h3 id="connection">Connection</h3>
+<pre><code>wss://api.dockease.io/ws/jobs/{job_id}/?token={access_token}</code></pre>
+<p>Authentication is via the JWT access token as a query parameter. API key authentication is not supported on WebSocket connections.</p>
+<h3 id="connection-lifecycle">Connection Lifecycle</h3>
+<pre><code>Client → Server: Connect
+Server → Client: {"type": "connection_established", "job_id": "job_01HQ2X"}
+Server → Client: {"type": "job_progress", ...}  (repeated)
+Server → Client: {"type": "job_completed", ...}  (on completion)
+Client → Server: Close</code></pre>
+<h3 id="message-types">Message Types</h3>
+<h4 id="connection_established"><code>connection_established</code></h4>
+<pre><span class="code-lang">json</span><code>{
+  "type": "connection_established",
+  "job_id": "job_01HQ2X",
+  "current_status": "running",
+  "current_progress": 45
+}</code></pre>
+<h4 id="job_progress"><code>job_progress</code></h4>
+<p>Sent approximately every 2 seconds while the job is running.</p>
+<pre><span class="code-lang">json</span><code>{
+  "type": "job_progress",
+  "job_id": "job_01HQ2X",
+  "status": "running",
+  "progress_percent": 67,
+  "ligands_completed": 6,
+  "ligands_total": 9,
+  "current_ligand": "compound_007",
+  "elapsed_seconds": 84,
+  "eta_seconds": 41,
+  "timestamp": "2026-03-14T11:32:25Z"
+}</code></pre>
+<h4 id="job_completed"><code>job_completed</code></h4>
+<pre><span class="code-lang">json</span><code>{
+  "type": "job_completed",
+  "job_id": "job_01HQ2X",
+  "status": "completed",
+  "result_count": 81,
+  "best_affinity_kcal_mol": -10.4,
+  "duration_seconds": 162,
+  "timestamp": "2026-03-14T11:33:42Z"
+}</code></pre>
+<h4 id="job_failed"><code>job_failed</code></h4>
+<pre><span class="code-lang">json</span><code>{
+  "type": "job_failed",
+  "job_id": "job_01HQ2X",
+  "status": "failed",
+  "error_code": "LIGAND_PREP_FAILED",
+  "error_message": "Ligand compound_003 could not be prepared: invalid valence.",
+  "timestamp": "2026-03-14T11:32:10Z"
+}</code></pre>
+<h3 id="reconnection">Reconnection</h3>
+<p>The DockEase frontend implements exponential backoff reconnection:</p>
+<ul>
+<li>Initial reconnect delay: 1 second</li>
+<li>Backoff multiplier: 2×</li>
+<li>Maximum delay: 30 seconds</li>
+<li>Maximum attempts: 10</li>
+</ul>
+<p>If implementing your own WebSocket client, we recommend adopting the same strategy to handle transient network interruptions without overwhelming the server.</p>
+<p><strong>Python WebSocket example:</strong></p>
+<pre><span class="code-lang">python</span><code>import asyncio
+import websockets
+import json
+
+async def watch_job(job_id: str, access_token: str):
+    url = f"wss://api.dockease.io/ws/jobs/{job_id}/?token={access_token}"
+    async with websockets.connect(url) as ws:
+        async for message in ws:
+            data = json.loads(message)
+            if data["type"] == "job_progress":
+                print(f"Progress: {data['progress_percent']}% ({data['ligands_completed']}/{data['ligands_total']})")
+            elif data["type"] == "job_completed":
+                print(f"Done! Best affinity: {data['best_affinity_kcal_mol']} kcal/mol")
+                break
+            elif data["type"] == "job_failed":
+                print(f"Failed: {data['error_message']}")
+                break
+
+asyncio.run(watch_job("job_01HQ2X", "eyJ..."))</code></pre>
+<hr/>
+<p><em>DockEase API Reference © 2026. For support, see <a href="https://docs.dockease.io">docs.dockease.io</a> or email <a href="mailto:api-support@dockease.io">api-support@dockease.io</a>.</em></p>
+    <div class="doc-footer">
+      <div class="brand">&#169; 2026 <strong>DockEase</strong> — Upload. Click. Discover.</div>
+      <div class="brand" style="font-size:11px;color:var(--text-faint);">Confidential · All rights reserved</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

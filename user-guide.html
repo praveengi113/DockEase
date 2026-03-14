@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>User Guide — DockEase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:          #0a0a0f;
+      --bg-card:     #111118;
+      --bg-code:     #0d1117;
+      --border:      #1e1e2e;
+      --border-light:#2a2a3d;
+      --text:        #e2e8f0;
+      --text-muted:  #94a3b8;
+      --text-faint:  #64748b;
+      --indigo:      #6366f1;
+      --indigo-light:#818cf8;
+      --indigo-dim:  #312e81;
+      --green:       #10b981;
+      --amber:       #f59e0b;
+      --red:         #ef4444;
+      --radius:      10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin:0; padding:0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    /* ── Layout ── */
+    .page-wrapper { display:flex; min-height:100vh; }
+
+    /* Sidebar */
+    .sidebar {
+      position: sticky; top: 0; height: 100vh; overflow-y: auto;
+      width: 260px; min-width: 260px;
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 32px 0 48px;
+      flex-shrink: 0;
+    }
+    .sidebar-logo {
+      display:flex; align-items:center; gap:10px;
+      padding: 0 24px 28px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .sidebar-logo .logo-mark {
+      width:32px; height:32px; border-radius:8px;
+      background: linear-gradient(135deg, var(--indigo), #8b5cf6);
+      display:flex; align-items:center; justify-content:center;
+      font-size:16px; font-weight:700; color:#fff; letter-spacing:-0.5px;
+      flex-shrink:0;
+    }
+    .sidebar-logo .logo-text { font-size:17px; font-weight:700; color:#fff; letter-spacing:-0.3px; }
+    .sidebar-logo .logo-sub  { font-size:10px; color: var(--text-faint); text-transform:uppercase; letter-spacing:1px; }
+    .sidebar-nav { padding: 0 12px; }
+    .sidebar-nav a {
+      display:block; padding:6px 12px; border-radius:6px;
+      color: var(--text-muted); text-decoration:none; font-size:13px;
+      transition: all .15s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .sidebar-nav a:hover { background: rgba(99,102,241,.12); color: var(--indigo-light); }
+    .sidebar-nav .nav-h1 { font-weight:600; color:var(--text); font-size:13px; margin-top:4px; }
+    .sidebar-nav .nav-h2 { padding-left:20px; font-size:12px; }
+    .sidebar-nav .nav-h3 { padding-left:32px; font-size:11.5px; color:var(--text-faint); }
+
+    /* Content */
+    .content {
+      flex:1; min-width:0;
+      padding: 48px 64px 96px;
+      max-width: 900px;
+    }
+
+    /* Header band */
+    .doc-header {
+      margin-bottom:48px; padding-bottom:32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-header .tag {
+      display:inline-block; margin-bottom:12px;
+      font-size:11px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+      color: var(--indigo-light); background: rgba(99,102,241,.12);
+      padding:4px 10px; border-radius:20px;
+    }
+    .doc-header h1 {
+      font-size:36px; font-weight:700; letter-spacing:-0.8px; line-height:1.2;
+      color:#fff; margin-bottom:12px;
+    }
+    .doc-header .subtitle {
+      font-size:15px; color:var(--text-muted); max-width:600px; line-height:1.6;
+    }
+    .doc-header .meta {
+      margin-top:16px; font-size:12px; color:var(--text-faint);
+      display:flex; gap:20px; flex-wrap:wrap;
+    }
+    .doc-header .meta span { display:flex; align-items:center; gap:5px; }
+
+    /* Typography */
+    h1,h2,h3,h4,h5,h6 { color:#fff; font-weight:600; letter-spacing:-0.3px; line-height:1.3; }
+    h1 { font-size:28px; margin:48px 0 16px; padding-top:8px; }
+    h2 {
+      font-size:20px; margin:40px 0 14px;
+      padding-bottom:8px; border-bottom:1px solid var(--border);
+    }
+    h3 { font-size:16px; margin:28px 0 10px; color:var(--indigo-light); }
+    h4 { font-size:14px; margin:20px 0 8px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+    p  { margin-bottom:14px; color:var(--text); }
+    a  { color:var(--indigo-light); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    strong { color:#fff; font-weight:600; }
+    em     { color:var(--text-muted); font-style:italic; }
+
+    ul,ol { margin:0 0 16px 24px; }
+    li { margin-bottom:6px; color:var(--text); }
+    li > ul, li > ol { margin-top:6px; margin-bottom:4px; }
+
+    /* Blockquote */
+    blockquote {
+      margin:20px 0; padding:14px 20px;
+      border-left:3px solid var(--indigo);
+      background:rgba(99,102,241,.07);
+      border-radius:0 var(--radius) var(--radius) 0;
+    }
+    blockquote p { margin:0; color:var(--text-muted); font-style:italic; }
+
+    /* Code */
+    code {
+      font-family:'JetBrains Mono', 'Fira Code', monospace;
+      font-size:13px; background:rgba(99,102,241,.1);
+      color:var(--indigo-light); padding:2px 6px; border-radius:4px;
+    }
+    pre {
+      background:var(--bg-code);
+      border:1px solid var(--border-light);
+      border-radius:var(--radius);
+      padding:20px 24px; overflow-x:auto;
+      margin:20px 0; position:relative;
+    }
+    pre code {
+      background:none; color:#e2e8f0;
+      padding:0; border-radius:0; font-size:13px; line-height:1.65;
+    }
+    .code-lang {
+      position:absolute; top:10px; right:14px;
+      font-size:10px; font-family:'JetBrains Mono',monospace;
+      color:var(--text-faint); text-transform:uppercase; letter-spacing:.5px;
+    }
+
+    /* Tables */
+    .table-wrap { overflow-x:auto; margin:20px 0; border-radius:var(--radius); border:1px solid var(--border); }
+    table { border-collapse:collapse; width:100%; font-size:13.5px; }
+    thead { background:rgba(99,102,241,.08); }
+    th {
+      padding:10px 16px; text-align:left; font-weight:600;
+      color:var(--text-muted); font-size:12px; text-transform:uppercase; letter-spacing:.5px;
+      border-bottom:1px solid var(--border);
+    }
+    td { padding:10px 16px; border-bottom:1px solid var(--border); color:var(--text); vertical-align:top; }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,.02); }
+
+    /* HR */
+    hr { border:none; border-top:1px solid var(--border); margin:32px 0; }
+
+    /* Callout boxes */
+    .callout { margin:20px 0; padding:14px 18px; border-radius:var(--radius); border-left:3px solid; }
+    .callout-note  { background:rgba(99,102,241,.07); border-color:var(--indigo);  }
+    .callout-warn  { background:rgba(245,158,11,.07); border-color:var(--amber);   }
+    .callout-tip   { background:rgba(16,185,129,.07); border-color:var(--green);   }
+    .callout-title { font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+    .callout-note  .callout-title { color:var(--indigo-light); }
+    .callout-warn  .callout-title { color:var(--amber); }
+    .callout-tip   .callout-title { color:var(--green); }
+
+    /* Badge chips */
+    .badge { display:inline-block; font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
+    .badge-green  { background:rgba(16,185,129,.15); color:var(--green); }
+    .badge-indigo { background:rgba(99,102,241,.15); color:var(--indigo-light); }
+    .badge-amber  { background:rgba(245,158,11,.15); color:var(--amber); }
+
+    /* Footer */
+    .doc-footer {
+      margin-top:64px; padding-top:24px; border-top:1px solid var(--border);
+      display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;
+    }
+    .doc-footer .brand { font-size:13px; color:var(--text-faint); }
+    .doc-footer .brand strong { color:var(--indigo-light); }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width:6px; height:6px; }
+    ::-webkit-scrollbar-track { background:transparent; }
+    ::-webkit-scrollbar-thumb { background:var(--border-light); border-radius:3px; }
+
+    /* Print / PDF */
+    @media print {
+      .sidebar { display:none; }
+      .content { padding:32px 40px; max-width:100%; }
+      body { background:#fff; color:#000; }
+      h1,h2,h3,h4 { color:#000; }
+      code { background:#f1f5f9; color:#3730a3; }
+      pre  { background:#f8fafc; border-color:#e2e8f0; }
+      pre code { color:#1e293b; }
+      td,th { color:#000; }
+      a { color:#4338ca; }
+      .doc-footer { color:#64748b; }
+    }
+    @page { margin:2cm 2.5cm; }
+  </style>
+</head>
+<body>
+<div class="page-wrapper">
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">D</div>
+      <div>
+        <div class="logo-text">DockEase</div>
+        <div class="logo-sub">Documentation</div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <a href="#table-of-contents" class="nav-h2">Table of Contents</a>
+      <a href="#introduction" class="nav-h2">Introduction</a>
+      <a href="#what-is-molecular-docking" class="nav-h3">What is Molecular Docking?</a>
+      <a href="#getting-started" class="nav-h2">Getting Started</a>
+      <a href="#1-create-your-account" class="nav-h3">1. Create Your Account</a>
+      <a href="#2-verify-your-email" class="nav-h3">2. Verify Your Email</a>
+      <a href="#3-onboarding-tour" class="nav-h3">3. Onboarding Tour</a>
+      <a href="#dashboard-overview" class="nav-h2">Dashboard Overview</a>
+      <a href="#projects" class="nav-h2">Projects</a>
+      <a href="#creating-a-project" class="nav-h3">Creating a Project</a>
+      <a href="#project-settings" class="nav-h3">Project Settings</a>
+      <a href="#archiving-vs-deleting" class="nav-h3">Archiving vs. Deleting</a>
+      <a href="#receptors" class="nav-h2">Receptors</a>
+      <a href="#uploading-a-receptor" class="nav-h3">Uploading a Receptor</a>
+      <a href="#fetching-from-rcsb-pdb" class="nav-h3">Fetching from RCSB PDB</a>
+      <a href="#automatic-receptor-preparation" class="nav-h3">Automatic Receptor Preparation</a>
+      <a href="#binding-site-detection" class="nav-h3">Binding Site Detection</a>
+      <a href="#ligands" class="nav-h2">Ligands</a>
+      <a href="#upload-a-file" class="nav-h3">Upload a File</a>
+      <a href="#enter-a-smiles-string" class="nav-h3">Enter a SMILES String</a>
+      <a href="#import-from-pubchem" class="nav-h3">Import from PubChem</a>
+      <a href="#automatic-ligand-preparation" class="nav-h3">Automatic Ligand Preparation</a>
+      <a href="#ligand-library-management" class="nav-h3">Ligand Library Management</a>
+      <a href="#running-docking-jobs" class="nav-h2">Running Docking Jobs</a>
+      <a href="#configuring-a-single-docking-job" class="nav-h3">Configuring a Single Docking Job</a>
+      <a href="#batch-mode" class="nav-h3">Batch Mode</a>
+      <a href="#virtual-screening-mode" class="nav-h3">Virtual Screening Mode</a>
+      <a href="#real-time-job-progress" class="nav-h3">Real-Time Job Progress</a>
+      <a href="#results-analysis" class="nav-h2">Results & Analysis</a>
+      <a href="#results-table" class="nav-h3">Results Table</a>
+      <a href="#3d-pose-viewer" class="nav-h3">3D Pose Viewer</a>
+      <a href="#filtering-and-sorting-results" class="nav-h3">Filtering and Sorting Results</a>
+      <a href="#score-calibration" class="nav-h2">Score Calibration</a>
+      <a href="#what-is-score-calibration" class="nav-h3">What is Score Calibration?</a>
+      <a href="#when-to-use-score-calibration" class="nav-h3">When to Use Score Calibration</a>
+      <a href="#step-by-step-running-score-calibration" class="nav-h3">Step-by-Step: Running Score Calibration</a>
+      <a href="#interpreting-auc-values" class="nav-h3">Interpreting AUC Values</a>
+      <a href="#fragment-growing" class="nav-h2">Fragment Growing</a>
+      <a href="#what-is-fragment-growing" class="nav-h3">What is Fragment Growing?</a>
+      <a href="#when-to-use-fragment-growing" class="nav-h3">When to Use Fragment Growing</a>
+      <a href="#step-by-step-running-fragment-growing" class="nav-h3">Step-by-Step: Running Fragment Growing</a>
+      <a href="#interpreting-fragment-growing-results" class="nav-h3">Interpreting Fragment Growing Results</a>
+      <a href="#admet-predictions" class="nav-h2">ADMET Predictions</a>
+      <a href="#running-admet-predictions" class="nav-h3">Running ADMET Predictions</a>
+      <a href="#admet-properties-reported" class="nav-h3">ADMET Properties Reported</a>
+      <a href="#exporting-data" class="nav-h2">Exporting Data</a>
+      <a href="#export-from-results-table" class="nav-h3">Export from Results Table</a>
+      <a href="#organizations-team-collaboration" class="nav-h2">Organizations & Team Collaboration</a>
+      <a href="#creating-an-organization" class="nav-h3">Creating an Organization</a>
+      <a href="#roles-and-permissions" class="nav-h3">Roles and Permissions</a>
+      <a href="#accepting-an-invitation" class="nav-h3">Accepting an Invitation</a>
+      <a href="#api-keys-webhooks" class="nav-h2">API Keys & Webhooks</a>
+      <a href="#generating-an-api-key" class="nav-h3">Generating an API Key</a>
+      <a href="#webhooks" class="nav-h3">Webhooks</a>
+      <a href="#billing-subscription" class="nav-h2">Billing & Subscription</a>
+      <a href="#subscription-tiers" class="nav-h3">Subscription Tiers</a>
+      <a href="#upgrading-your-plan" class="nav-h3">Upgrading Your Plan</a>
+      <a href="#job-usage-rollover" class="nav-h3">Job Usage Rollover</a>
+      <a href="#tips-troubleshooting" class="nav-h2">Tips & Troubleshooting</a>
+      <a href="#receptor-preparation-failed" class="nav-h3">Receptor Preparation Failed</a>
+      <a href="#docking-job-stuck-in-queued" class="nav-h3">Docking Job Stuck in "Queued"</a>
+      <a href="#results-look-unreasonable-very-high-or-very-low-scores" class="nav-h3">Results Look Unreasonable (Very High or Ve…</a>
+      <a href="#3d-viewer-not-loading" class="nav-h3">3D Viewer Not Loading</a>
+      <a href="#websocket-disconnected-during-job" class="nav-h3">WebSocket Disconnected During Job</a>
+      <a href="#faq" class="nav-h2">FAQ</a>
+    </div>
+  </nav>
+  <main class="content">
+    <div class="doc-header">
+      <div class="tag">DockEase Docs</div>
+      <h1>User Guide</h1>
+      <div class="meta">
+        <span>&#128197; March 14, 2026</span>
+        <span>&#128196; v1.0</span>
+      </div>
+    </div>
+<blockquote><p><strong>Version 1.0</strong> | Last updated: March 2026</p></blockquote>
+<hr/>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#dashboard-overview">Dashboard Overview</a></li>
+<li><a href="#projects">Projects</a></li>
+<li><a href="#receptors">Receptors</a></li>
+<li><a href="#ligands">Ligands</a></li>
+<li><a href="#running-docking-jobs">Running Docking Jobs</a></li>
+<li><a href="#results--analysis">Results & Analysis</a></li>
+<li><a href="#score-calibration">Score Calibration (USP)</a></li>
+<li><a href="#fragment-growing">Fragment Growing (USP)</a></li>
+<li><a href="#admet-predictions">ADMET Predictions</a></li>
+<li><a href="#exporting-data">Exporting Data</a></li>
+<li><a href="#organizations--team-collaboration">Organizations & Team Collaboration</a></li>
+<li><a href="#api-keys--webhooks">API Keys & Webhooks</a></li>
+<li><a href="#billing--subscription">Billing & Subscription</a></li>
+<li><a href="#tips--troubleshooting">Tips & Troubleshooting</a></li>
+<li><a href="#faq">FAQ</a></li>
+</ol>
+<hr/>
+<h2 id="introduction">Introduction</h2>
+<p><strong>DockEase</strong> is a browser-based molecular docking platform that puts the power of AutoDock Vina, AutoDock-GPU, Uni-Dock, and Smina in your browser — no installation, no command line, no PhD in bioinformatics required. Upload your receptor and ligands, configure your docking box, and get ranked binding poses with affinity scores in minutes.</p>
+<p><strong>Tagline: Upload. Click. Discover.</strong></p>
+<p>Whether you are an academic researcher screening a library of 10,000 compounds, a biotech startup validating a lead series, or a student learning structure-based drug design, DockEase scales to your workflow and your budget.</p>
+<h3 id="what-is-molecular-docking">What is Molecular Docking?</h3>
+<p>Molecular docking is a computational method that predicts the preferred orientation and binding affinity of a small molecule (ligand) inside the active site of a protein (receptor). The output is a ranked list of binding poses, each with a free energy of binding score (kcal/mol). Lower (more negative) scores indicate stronger predicted binding.</p>
+<pre><code>Receptor (protein) + Ligand (small molecule) → Predicted binding poses + ΔG scores</code></pre>
+<p>DockEase automates the entire pipeline:</p>
+<pre><span class="code-lang">mermaid</span><code>flowchart LR
+    A[Upload Receptor] --&gt; B[Auto-Prepare PDBQT]
+    C[Upload / Input Ligand] --&gt; D[Auto-Prepare PDBQT]
+    B --&gt; E[Detect Binding Site]
+    D --&gt; E
+    E --&gt; F[Docking Engine]
+    F --&gt; G[Ranked Results]
+    G --&gt; H[3D Pose Viewer]
+    G --&gt; I[ADMET Prediction]
+    G --&gt; J[Score Calibration]
+    G --&gt; K[Fragment Growing]</code></pre>
+<hr/>
+<h2 id="getting-started">Getting Started</h2>
+<h3 id="1-create-your-account">1. Create Your Account</h3>
+<p>Navigate to <a href="https://app.dockease.io">app.dockease.io</a> and click <strong>Get Started Free</strong>.</p>
+<p><img src="./assets/screenshots/register.png" alt="Registration page showing email, password fields and the 'Create Account' button" /></p>
+<p><em>Figure 1: The DockEase registration page. Enter your work or academic email address and a secure password.</em></p>
+<p>Fill in:</p>
+<ul>
+<li><strong>Full Name</strong> — used for display and organization invites</li>
+<li><strong>Email Address</strong> — a verification email will be sent here</li>
+<li><strong>Password</strong> — minimum 10 characters; use a passphrase for security</li>
+<li><strong>Affiliation</strong> (optional) — your institution or company</li>
+</ul>
+<p>Click <strong>Create Account</strong>. You will receive a verification email within 60 seconds.</p>
+<blockquote><p><strong>Tip:</strong> If you do not see the verification email, check your spam folder and click <strong>Resend Verification</strong> on the confirmation screen.</p></blockquote>
+<h3 id="2-verify-your-email">2. Verify Your Email</h3>
+<p>Open the email from <code>noreply@dockease.io</code> and click <strong>Verify Email Address</strong>. You will be redirected to the dashboard and logged in automatically.</p>
+<h3 id="3-onboarding-tour">3. Onboarding Tour</h3>
+<p>On first login, DockEase launches a guided 5-step onboarding tour:</p>
+<ol>
+<li><strong>Create a Project</strong> — Projects group receptors, ligands, and jobs together.</li>
+<li><strong>Upload a Receptor</strong> — Upload a PDB file or fetch directly from RCSB.</li>
+<li><strong>Add a Ligand</strong> — Upload SDF/MOL2, paste a SMILES string, or import from PubChem.</li>
+<li><strong>Run Your First Docking Job</strong> — Configure the search box and launch.</li>
+<li><strong>View Results</strong> — Explore ranked poses in the 3D viewer.</li>
+</ol>
+<p>You can skip the tour at any time and return to it via <strong>Help → Onboarding Tour</strong> in the top navigation.</p>
+<hr/>
+<h2 id="dashboard-overview">Dashboard Overview</h2>
+<p><img src="./assets/screenshots/dashboard.png" alt="Main dashboard showing project cards, recent jobs panel, and usage meter in the sidebar" /></p>
+<p><em>Figure 2: The DockEase dashboard. Recent projects appear as cards on the left; the right sidebar shows your monthly job usage and quick-access links.</em></p>
+<p>The dashboard is divided into:</p>
+<div class="table-wrap"><table><thead><tr><th>Panel</th><th>Description</th></tr></thead><tbody><tr><td><strong>Projects</strong></td><td>Cards for each project. Click to open. Star to pin to top.</td></tr><tr><td><strong>Recent Jobs</strong></td><td>Last 10 jobs with live status badges (Queued / Running / Done / Failed).</td></tr><tr><td><strong>Usage Meter</strong></td><td>Visual ring showing jobs used vs. your monthly allowance.</td></tr><tr><td><strong>Quick Actions</strong></td><td>Shortcuts to upload receptor, add ligand, run job.</td></tr></tbody></table></div>
+<p>The <strong>top navigation bar</strong> contains:</p>
+<ul>
+<li><strong>DockEase logo</strong> — returns to dashboard</li>
+<li><strong>Project selector</strong> — dropdown to switch active project</li>
+<li><strong>Notifications bell</strong> — job completion alerts, invite notifications</li>
+<li><strong>Account menu</strong> — profile, settings, billing, logout</li>
+</ul>
+<hr/>
+<h2 id="projects">Projects</h2>
+<p>Projects are the top-level organisational unit. All receptors, ligands, and docking jobs belong to a project.</p>
+<h3 id="creating-a-project">Creating a Project</h3>
+<ol>
+<li>Click <strong>+ New Project</strong> from the dashboard or the sidebar.</li>
+<li>Enter a <strong>Project Name</strong> (required) and <strong>Description</strong> (optional).</li>
+<li>Choose <strong>Visibility</strong>: Private (default) or Shared with Organisation.</li>
+<li>Click <strong>Create Project</strong>.</li>
+</ol>
+<p><img src="./assets/screenshots/project-create.png" alt="New project dialog with name, description, and visibility fields" /></p>
+<p><em>Figure 3: Create a new project. Projects shared with an Organisation are visible to all members of that Organisation according to their RBAC role.</em></p>
+<h3 id="project-settings">Project Settings</h3>
+<p>Inside a project, click the <strong>Settings</strong> (gear icon) tab to:</p>
+<ul>
+<li>Rename or update the description</li>
+<li>Archive the project (hides from dashboard; data preserved)</li>
+<li>Delete the project (permanently deletes all receptors, ligands, jobs, and results)</li>
+<li>Share with an Organisation</li>
+</ul>
+<blockquote><p><strong>Warning:</strong> Project deletion is irreversible. All associated files, job results, and ADMET predictions are permanently removed.</p></blockquote>
+<h3 id="archiving-vs-deleting">Archiving vs. Deleting</h3>
+<div class="table-wrap"><table><thead><tr><th>Action</th><th>Jobs/Data</th><th>Billing</th><th>Reversible</th></tr></thead><tbody><tr><td>Archive</td><td>Preserved</td><td>Counts toward storage</td><td>Yes</td></tr><tr><td>Delete</td><td>Permanently removed</td><td>Storage freed</td><td>No</td></tr></tbody></table></div>
+<hr/>
+<h2 id="receptors">Receptors</h2>
+<p>A <strong>receptor</strong> is the protein or macromolecular target you wish to dock ligands against. DockEase accepts PDB and PDBQT format files and automatically prepares them for docking.</p>
+<h3 id="uploading-a-receptor">Uploading a Receptor</h3>
+<ol>
+<li>Inside your project, click the <strong>Receptors</strong> tab.</li>
+<li>Click <strong>+ Add Receptor</strong>.</li>
+<li>Choose <strong>Upload File</strong> and select your <code>.pdb</code> or <code>.pdbqt</code> file (max 50 MB).</li>
+<li>(Optional) Enter a receptor name and notes.</li>
+<li>Click <strong>Upload</strong>.</li>
+</ol>
+<p><img src="./assets/screenshots/receptor-upload.png" alt="Receptor upload dialog showing file picker, optional name field, and upload button" /></p>
+<p><em>Figure 4: Uploading a receptor. PDB files are automatically processed through PDBFixer (to repair missing residues and fix non-standard residues) and OpenBabel (to add Gasteiger charges and generate PDBQT).</em></p>
+<h3 id="fetching-from-rcsb-pdb">Fetching from RCSB PDB</h3>
+<p>If your target structure is in the RCSB Protein Data Bank:</p>
+<ol>
+<li>Click <strong>+ Add Receptor → Fetch from PDB</strong>.</li>
+<li>Enter the 4-character <strong>PDB ID</strong> (e.g., <code>2ITO</code>, <code>6LU7</code>).</li>
+<li>Click <strong>Fetch</strong>. The structure is downloaded and prepared automatically.</li>
+</ol>
+<blockquote><p><strong>Tip:</strong> For co-crystallised structures, DockEase will keep the protein chain only. Crystallographic waters and co-factors are removed during preparation unless you opt to retain them in advanced settings.</p></blockquote>
+<h3 id="automatic-receptor-preparation">Automatic Receptor Preparation</h3>
+<p>When you upload a PDB file, DockEase runs a preparation pipeline in the background:</p>
+<pre><code>PDB file
+  └── PDBFixer
+        ├── Add missing residues
+        ├── Add missing atoms
+        ├── Fix non-standard residues
+        └── Add hydrogens
+  └── OpenBabel
+        ├── Assign Gasteiger charges
+        └── Generate PDBQT</code></pre>
+<p>Preparation typically completes in under 60 seconds. You will see a spinner on the receptor card; once it turns green, the receptor is ready to use.</p>
+<h3 id="binding-site-detection">Binding Site Detection</h3>
+<p>DockEase offers two methods to define the docking search box:</p>
+<h4 id="automated-detection-p2rank">Automated Detection (P2Rank)</h4>
+<ol>
+<li>Open the receptor, click <strong>Detect Binding Sites</strong>.</li>
+<li>P2Rank analyses the receptor surface and returns ranked predicted pockets.</li>
+<li>Each pocket is shown with a predicted probability score and estimated volume (Å³).</li>
+<li>Click <strong>Use This Site</strong> to apply the site's bounding box to your docking job.</li>
+</ol>
+<p><img src="./assets/screenshots/binding-site-detection.png" alt="Binding site detection panel showing three ranked pockets overlaid on a 3D protein viewer" /></p>
+<p><em>Figure 5: Automated binding site detection with P2Rank. Pockets are ranked by probability. Green = highest confidence; yellow = moderate.</em></p>
+<h4 id="manual-box-definition">Manual Box Definition</h4>
+<p>For cases where you know the binding site (e.g., from a co-crystal structure):</p>
+<ol>
+<li>Open the receptor's <strong>3D Viewer</strong>.</li>
+<li>Click <strong>Define Box Manually</strong>.</li>
+<li>Drag the box handles or enter coordinates directly: <strong>Center (x, y, z)</strong> and <strong>Size (x, y, z)</strong> in Ångströms.</li>
+<li>Click <strong>Save Box</strong>.</li>
+</ol>
+<blockquote><p><strong>Best practice:</strong> Set the box to at least 20 × 20 × 20 Å for a typical pocket. For allosteric or large groove sites, increase to 30 × 30 × 30 Å.</p></blockquote>
+<hr/>
+<h2 id="ligands">Ligands</h2>
+<p>A <strong>ligand</strong> is the small molecule you wish to dock. DockEase supports multiple input methods and prepares ligands automatically.</p>
+<h3 id="upload-a-file">Upload a File</h3>
+<p>Accepted formats: <strong>SDF</strong>, <strong>MOL2</strong> (single or multi-structure).</p>
+<ol>
+<li>Click the <strong>Ligands</strong> tab inside your project.</li>
+<li>Click <strong>+ Add Ligand → Upload File</strong>.</li>
+<li>Select your SDF or MOL2 file. Multi-structure SDF files are split into individual ligand records.</li>
+<li>Click <strong>Upload</strong>.</li>
+</ol>
+<h3 id="enter-a-smiles-string">Enter a SMILES String</h3>
+<ol>
+<li>Click <strong>+ Add Ligand → From SMILES</strong>.</li>
+<li>Paste or type your SMILES (e.g., <code>CC(=O)Oc1ccccc1C(=O)O</code> for aspirin).</li>
+<li>A 2D structure depiction is rendered in real time.</li>
+<li>Enter a ligand name.</li>
+<li>Click <strong>Add</strong>.</li>
+</ol>
+<p><img src="./assets/screenshots/smiles-input.png" alt="SMILES input panel showing a text field with aspirin SMILES and a 2D depiction rendered on the right" /></p>
+<p><em>Figure 6: SMILES input with live 2D preview. The depiction updates as you type, giving immediate visual feedback on the structure.</em></p>
+<h3 id="import-from-pubchem">Import from PubChem</h3>
+<ol>
+<li>Click <strong>+ Add Ligand → From PubChem</strong>.</li>
+<li>Enter a <strong>CID</strong> (e.g., <code>2244</code>) or a <strong>compound name</strong> (e.g., "aspirin").</li>
+<li>DockEase fetches the canonical SMILES and generates the 3D conformer.</li>
+<li>Click <strong>Import</strong>.</li>
+</ol>
+<h3 id="automatic-ligand-preparation">Automatic Ligand Preparation</h3>
+<p>All ligands go through the following pipeline:</p>
+<pre><code>SMILES / SDF / MOL2
+  └── RDKit
+        ├── Sanitise molecule
+        ├── Generate 3D conformer (ETKDG)
+        └── Assign partial charges (MMFF94)
+  └── Meeko
+        └── Generate PDBQT with torsion tree</code></pre>
+<p>Ligand preparation is fast (typically under 10 seconds per ligand).</p>
+<h3 id="ligand-library-management">Ligand Library Management</h3>
+<p>For batch virtual screening, you can upload multi-structure SDF files (up to 10,000 compounds per file on Pro; 50,000 on Enterprise). DockEase processes them in a background batch job.</p>
+<hr/>
+<h2 id="running-docking-jobs">Running Docking Jobs</h2>
+<h3 id="configuring-a-single-docking-job">Configuring a Single Docking Job</h3>
+<ol>
+<li>Click <strong>+ New Job</strong> from the project view.</li>
+<li>Select a prepared <strong>Receptor</strong> (green status indicator).</li>
+<li>Select a <strong>Binding Site</strong> (from detection or manual box).</li>
+<li>Select one or more <strong>Ligands</strong>.</li>
+<li>Choose a <strong>Docking Engine</strong>:</li>
+</ol>
+<div class="table-wrap"><table><thead><tr><th>Engine</th><th>Mode</th><th>Best For</th></tr></thead><tbody><tr><td>AutoDock Vina</td><td>CPU</td><td>Default; reliable and fast</td></tr><tr><td>AutoDock-GPU</td><td>GPU</td><td>Large libraries; 10–100x faster (Pro/Enterprise)</td></tr><tr><td>Uni-Dock</td><td>GPU Batch</td><td>Virtual screening of thousands of compounds</td></tr><tr><td>Smina</td><td>CPU</td><td>Custom scoring functions; re-scoring</td></tr></tbody></table></div>
+<ol>
+<li>Set <strong>Exhaustiveness</strong> (Vina): 8 (default), 16 (higher accuracy), 32 (maximum).</li>
+<li>Set <strong>Number of Poses</strong> (default: 9).</li>
+<li>Click <strong>Launch Job</strong>.</li>
+</ol>
+<p><img src="./assets/screenshots/job-config.png" alt="Job configuration panel showing receptor selector, ligand picker, engine dropdown, and parameter sliders" /></p>
+<p><em>Figure 7: Job configuration. The estimated runtime is shown before you submit based on the number of ligands, engine selection, and exhaustiveness setting.</em></p>
+<h3 id="batch-mode">Batch Mode</h3>
+<p>To dock multiple ligands in one job:</p>
+<ol>
+<li>In the ligand selector, check multiple ligands from your library.</li>
+<li>DockEase automatically switches to batch mode.</li>
+<li>All ligands are docked against the same receptor and binding site.</li>
+<li>Results are aggregated into a single job result table.</li>
+</ol>
+<h3 id="virtual-screening-mode">Virtual Screening Mode</h3>
+<p>For screening large compound libraries (hundreds to thousands of ligands):</p>
+<ol>
+<li>Upload a multi-structure SDF file via <strong>Ligands → Upload Batch Library</strong>.</li>
+<li>Select the library from the ligand picker — it appears as a single "library" entry showing the compound count.</li>
+<li>Choose <strong>Uni-Dock</strong> or <strong>AutoDock-GPU</strong> for optimal throughput.</li>
+<li>Launch. Real-time progress is shown via WebSocket.</li>
+</ol>
+<h3 id="real-time-job-progress">Real-Time Job Progress</h3>
+<p>Once a job is submitted, a live progress card appears on the dashboard:</p>
+<p><img src="./assets/screenshots/job-progress.png" alt="Job progress card showing a spinning indicator, percentage complete bar, and elapsed time" /></p>
+<p><em>Figure 8: Real-time job progress. The progress bar updates via WebSocket approximately every 2 seconds. If you close the browser, you can return to find the job has continued running.</em></p>
+<p>Progress states:</p>
+<ul>
+<li><strong>Queued</strong> — waiting for a worker slot</li>
+<li><strong>Preparing</strong> — receptor/ligand preparation running</li>
+<li><strong>Docking</strong> — engine actively running</li>
+<li><strong>Post-processing</strong> — parsing results, generating poses</li>
+<li><strong>Completed</strong> — results ready</li>
+<li><strong>Failed</strong> — see error message; retry available</li>
+</ul>
+<hr/>
+<h2 id="results-analysis">Results & Analysis</h2>
+<h3 id="results-table">Results Table</h3>
+<p><img src="./assets/screenshots/results-table.png" alt="Results table showing columns: Ligand name, Binding Affinity (kcal/mol), RMSD lower bound, RMSD upper bound, Pose, and an action column" /></p>
+<p><em>Figure 9: The results table. Click any column header to sort. Click a row to load the pose in the 3D viewer on the right.</em></p>
+<p>Columns:</p>
+<div class="table-wrap"><table><thead><tr><th>Column</th><th>Description</th></tr></thead><tbody><tr><td><strong>Ligand</strong></td><td>Name/ID of the compound</td></tr><tr><td><strong>Affinity (kcal/mol)</strong></td><td>Predicted binding free energy. More negative = stronger binding.</td></tr><tr><td><strong>RMSD l.b.</strong></td><td>RMSD to best pose (lower bound)</td></tr><tr><td><strong>RMSD u.b.</strong></td><td>RMSD to best pose (upper bound)</td></tr><tr><td><strong>Pose</strong></td><td>Pose rank (1 = best)</td></tr><tr><td><strong>ADMET</strong></td><td>Button to view or compute ADMET predictions</td></tr><tr><td><strong>Grow</strong></td><td>Button to launch Fragment Growing from this pose</td></tr></tbody></table></div>
+<h3 id="3d-pose-viewer">3D Pose Viewer</h3>
+<p>Click any row to load the docked pose in the integrated NGL viewer:</p>
+<ul>
+<li><strong>Rotate</strong>: Left-click and drag</li>
+<li><strong>Zoom</strong>: Scroll wheel</li>
+<li><strong>Pan</strong>: Right-click and drag</li>
+<li><strong>Toggle receptor surface</strong>: Click the surface icon in the viewer toolbar</li>
+<li><strong>Show contacts</strong>: Click the contact map icon to highlight hydrogen bonds, hydrophobic contacts, and pi-stacking interactions</li>
+</ul>
+<p><img src="./assets/screenshots/3d-viewer.png" alt="3D NGL pose viewer showing a ligand (coloured by element) inside a protein pocket (grey cartoon with transparent surface)" /></p>
+<p><em>Figure 10: The integrated 3D pose viewer. The receptor is shown as a grey cartoon with a semi-transparent surface. The ligand is coloured by element. Hydrogen bonds are shown as yellow dashed lines.</em></p>
+<h3 id="filtering-and-sorting-results">Filtering and Sorting Results</h3>
+<ul>
+<li><strong>Sort</strong> by clicking column headers (ascending/descending toggle)</li>
+<li><strong>Filter by affinity</strong>: Enter a threshold (e.g., show only poses with affinity < −8.0 kcal/mol)</li>
+<li><strong>Filter by Lipinski compliance</strong>: Toggle to show only drug-like molecules (MW < 500, logP < 5, HBD ≤ 5, HBA ≤ 10)</li>
+<li><strong>Search by ligand name</strong>: Type in the search bar above the table</li>
+</ul>
+<hr/>
+<h2 id="score-calibration">Score Calibration</h2>
+<blockquote><p><strong>Industry-First Feature</strong> — Unique to DockEase</p></blockquote>
+<h3 id="what-is-score-calibration">What is Score Calibration?</h3>
+<p>Raw docking scores are not inherently calibrated. A score of −8.0 kcal/mol may be excellent for one target and mediocre for another. The Score Calibration feature uses your known <strong>actives</strong> (compounds you know bind) and <strong>inactives</strong> (compounds you know do not bind) to compute a <strong>target-specific score threshold</strong> with statistical rigour.</p>
+<p>Under the hood, DockEase:</p>
+<ol>
+<li>Docks all your actives and inactives against your receptor</li>
+<li>Computes a <strong>Receiver Operating Characteristic (ROC) curve</strong> — a plot of True Positive Rate vs. False Positive Rate across all possible score thresholds</li>
+<li>Calculates the <strong>AUC</strong> (Area Under the Curve) — a single number from 0.5 (random) to 1.0 (perfect)</li>
+<li>Identifies the <strong>optimal threshold</strong> using <strong>Youden's J statistic</strong> (J = Sensitivity + Specificity − 1), which maximises the balance between catching true actives and excluding false positives</li>
+</ol>
+<h3 id="when-to-use-score-calibration">When to Use Score Calibration</h3>
+<ul>
+<li>You have literature data: IC50 / Ki measurements for your target</li>
+<li>You are running a prospective screen and want a defensible activity cutoff</li>
+<li>You want to compare enrichment performance across docking engines for your specific target</li>
+</ul>
+<h3 id="step-by-step-running-score-calibration">Step-by-Step: Running Score Calibration</h3>
+<ol>
+<li>Open your <strong>Receptor</strong> and click the <strong>Calibrate</strong> tab.</li>
+<li>Upload or select your <strong>known actives</strong> (SDF or ligand IDs from your library).</li>
+<li>Upload or select your <strong>known inactives</strong> (decoys — use DUD-E decoys if available).</li>
+<li>Click <strong>Run Calibration</strong>.</li>
+</ol>
+<p><img src="./assets/screenshots/calibration-setup.png" alt="Score calibration setup panel with active/inactive upload zones and a 'Run Calibration' button" /></p>
+<p><em>Figure 11: Score calibration setup. A minimum of 5 actives and 10 inactives is required. For statistically meaningful results, we recommend at least 20 actives and 50 inactives.</em></p>
+<ol>
+<li>DockEase docks all compounds and generates the ROC curve.</li>
+</ol>
+<p><img src="./assets/screenshots/calibration-roc.png" alt="ROC curve plot with AUC displayed in the legend. A red dot marks the Youden's J optimal threshold point on the curve." /></p>
+<p><em>Figure 12: The ROC curve generated after calibration. The AUC is displayed in the legend. The red dot marks the optimal Youden's J threshold — the score cutoff that maximises enrichment for this receptor.</em></p>
+<ol>
+<li>The calibration result displays:</li>
+<li><strong>AUC score</strong> (0.5–1.0)</li>
+<li><strong>Optimal affinity threshold</strong> (e.g., −7.8 kcal/mol)</li>
+<li><strong>Sensitivity at threshold</strong> (% actives correctly identified)</li>
+<li><strong>Specificity at threshold</strong> (% inactives correctly excluded)</li>
+</ol>
+<ol>
+<li>Click <strong>Apply to Screen</strong> to use this threshold to automatically flag hits in your current virtual screening results.</li>
+</ol>
+<h3 id="interpreting-auc-values">Interpreting AUC Values</h3>
+<div class="table-wrap"><table><thead><tr><th>AUC</th><th>Interpretation</th></tr></thead><tbody><tr><td>0.5</td><td>No better than random — docking not predictive for this target</td></tr><tr><td>0.6–0.7</td><td>Below average</td></tr><tr><td>0.7–0.8</td><td>Acceptable enrichment</td></tr><tr><td>0.8–0.9</td><td>Good</td></tr><tr><td>0.9–1.0</td><td>Excellent</td></tr></tbody></table></div>
+<blockquote><p><strong>Caution:</strong> AUC can be inflated if your inactives are not true non-binders (i.e., they have never been tested against your target). Using carefully curated decoy sets (e.g., property-matched DUD-E decoys) gives more reliable calibration.</p></blockquote>
+<hr/>
+<h2 id="fragment-growing">Fragment Growing</h2>
+<blockquote><p><strong>Industry-First Feature</strong> — Unique to DockEase</p></blockquote>
+<h3 id="what-is-fragment-growing">What is Fragment Growing?</h3>
+<p>Fragment growing (also called <strong>fragment elaboration</strong> or <strong>lead optimisation</strong>) is a medicinal chemistry strategy where you take a docked fragment or lead compound and systematically explore chemical space by attaching small fragments at available attachment points. DockEase automates this computationally:</p>
+<ol>
+<li>You pick a <strong>docked ligand pose</strong> and choose an <strong>attachment atom</strong> on that molecule</li>
+<li>DockEase enumerates <strong>24 medicinal chemistry fragments</strong> (common R-groups: methyl, ethyl, fluorine, chlorine, hydroxyl, methoxy, trifluoromethyl, amino, cyano, carboxyl, acetamido, morpholino, piperazinyl, pyridyl, phenyl, difluoromethyl, cyclopropyl, sulfamido, methanesulfonyl, and more)</li>
+<li>Each variant is prepared and docked in batch</li>
+<li>Results are ranked by <strong>ΔΔG</strong> — the improvement in binding affinity relative to the parent compound</li>
+</ol>
+<h3 id="when-to-use-fragment-growing">When to Use Fragment Growing</h3>
+<ul>
+<li>You have a validated lead compound and want to improve potency</li>
+<li>You are in a fragment-based drug discovery (FBDD) campaign</li>
+<li>You want to explore SAR (Structure-Activity Relationships) computationally before synthesis</li>
+</ul>
+<h3 id="step-by-step-running-fragment-growing">Step-by-Step: Running Fragment Growing</h3>
+<ol>
+<li>In your <strong>Results Table</strong>, find the pose you wish to grow from and click the <strong>Grow</strong> button in the action column.</li>
+</ol>
+<p><img src="./assets/screenshots/fragment-grow-trigger.png" alt="Results table with the Grow button highlighted in the action column of the top-ranked result row" /></p>
+<p><em>Figure 13: Initiating Fragment Growing from the results table. The Grow button is available for any completed docking result.</em></p>
+<ol>
+<li>The <strong>Fragment Growing</strong> panel opens, showing the 2D structure of your compound with clickable atoms.</li>
+<li>Click on the <strong>attachment atom</strong> — the atom where you want to add fragments. Eligible atoms are highlighted in green (hydrogens can be substituted; positions with a hydrogen are attachment-eligible).</li>
+<li>Review the <strong>24 fragment variants</strong> listed below the structure.</li>
+<li>Click <strong>Grow All</strong> to dock all 24 variants, or select specific fragments and click <strong>Grow Selected</strong>.</li>
+</ol>
+<p><img src="./assets/screenshots/fragment-grow-panel.png" alt="Fragment growing panel showing parent compound 2D structure with highlighted attachment atoms, a checklist of 24 fragments, and a Grow All button" /></p>
+<p><em>Figure 14: The Fragment Growing panel. Green atoms are eligible attachment points. The fragment list shows the chemical structure and SMILES of each fragment to be added.</em></p>
+<ol>
+<li>DockEase creates a batch docking job. Progress is shown in real time.</li>
+</ol>
+<ol>
+<li>Results display a <strong>ΔΔG column</strong>:</li>
+</ol>
+<pre><code>ΔΔG = Affinity(variant) − Affinity(parent)
+
+Negative ΔΔG = improved binding (better than parent)
+Positive ΔΔG = worse binding</code></pre>
+<p><img src="./assets/screenshots/fragment-grow-results.png" alt="Fragment growing results table with ΔΔG column highlighted. Top result shows -1.2 kcal/mol improvement with a fluorine substituent." /></p>
+<p><em>Figure 15: Fragment Growing results ranked by ΔΔG. A fluorine substituent shows the greatest improvement at −1.2 kcal/mol. Click any row to view the pose in the 3D viewer.</em></p>
+<ol>
+<li>Click any variant to view the docked pose alongside the parent compound for direct visual comparison.</li>
+</ol>
+<h3 id="interpreting-fragment-growing-results">Interpreting Fragment Growing Results</h3>
+<ul>
+<li><strong>ΔΔG < −0.5 kcal/mol</strong>: Meaningful improvement; worth pursuing experimentally</li>
+<li><strong>ΔΔG −0.5 to 0</strong>: Marginal; may improve other properties (solubility, selectivity)</li>
+<li><strong>ΔΔG > 0</strong>: Fragment reduces predicted affinity at this position</li>
+</ul>
+<blockquote><p><strong>Note:</strong> Fragment Growing is a computational shortcut, not a replacement for synthesis. Always validate computationally promising fragments experimentally before committing synthetic resources.</p></blockquote>
+<hr/>
+<h2 id="admet-predictions">ADMET Predictions</h2>
+<p><strong>ADMET</strong> stands for Absorption, Distribution, Metabolism, Excretion, and Toxicity. DockEase integrates ADMET prediction to help assess the drug-likeness and safety profile of your hits.</p>
+<h3 id="running-admet-predictions">Running ADMET Predictions</h3>
+<ol>
+<li>In the results table, click the <strong>ADMET</strong> button for any compound.</li>
+<li>DockEase submits the SMILES to the prediction engine and returns results in under 60 seconds.</li>
+</ol>
+<h3 id="admet-properties-reported">ADMET Properties Reported</h3>
+<div class="table-wrap"><table><thead><tr><th>Category</th><th>Property</th><th>Notes</th></tr></thead><tbody><tr><td>Absorption</td><td>Caco-2 permeability</td><td>Intestinal absorption proxy</td></tr><tr><td>Absorption</td><td>Blood-Brain Barrier</td><td>CNS penetration prediction</td></tr><tr><td>Distribution</td><td>Volume of distribution</td><td>Vd (L/kg)</td></tr><tr><td>Distribution</td><td>PPB (plasma protein binding)</td><td>% bound</td></tr><tr><td>Metabolism</td><td>CYP450 inhibition</td><td>CYP1A2, 2C9, 2C19, 2D6, 3A4</td></tr><tr><td>Excretion</td><td>Renal clearance</td><td>ml/min/kg</td></tr><tr><td>Toxicity</td><td>hERG inhibition</td><td>Cardiac toxicity risk</td></tr><tr><td>Toxicity</td><td>AMES mutagenicity</td><td>Mutagenicity risk</td></tr><tr><td>Toxicity</td><td>Hepatotoxicity</td><td>Liver toxicity risk</td></tr><tr><td>Lipinski</td><td>Ro5 compliance</td><td>MW, logP, HBD, HBA</td></tr><tr><td>Veber</td><td>Ro5 + rotatable bonds, TPSA</td><td>Oral bioavailability</td></tr></tbody></table></div>
+<hr/>
+<h2 id="exporting-data">Exporting Data</h2>
+<h3 id="export-from-results-table">Export from Results Table</h3>
+<ol>
+<li>Open a completed job's results.</li>
+<li>Click <strong>Export</strong> in the toolbar.</li>
+<li>Choose format:</li>
+<li><strong>CSV</strong> — affinity scores and metadata (all rows or filtered)</li>
+<li><strong>SDF</strong> — 3D coordinates of all poses (all or filtered)</li>
+<li>Click <strong>Download</strong>.</li>
+</ol>
+<p>Exported SDF files include the affinity score as an SD property tag (<code><DOCKING_SCORE></code>), making them compatible with downstream cheminformatics tools (RDKit, DataWarrior, Maestro).</p>
+<hr/>
+<h2 id="organizations-team-collaboration">Organizations & Team Collaboration</h2>
+<p>Organizations (Orgs) allow teams to collaborate on shared projects with role-based access control.</p>
+<h3 id="creating-an-organization">Creating an Organization</h3>
+<ol>
+<li>Navigate to <strong>Account → Organizations → Create Organization</strong>.</li>
+<li>Enter an organization name.</li>
+<li>Invite team members by email.</li>
+</ol>
+<h3 id="roles-and-permissions">Roles and Permissions</h3>
+<div class="table-wrap"><table><thead><tr><th>Role</th><th>View Projects</th><th>Run Jobs</th><th>Manage Receptors/Ligands</th><th>Invite Members</th><th>Delete Org</th></tr></thead><tbody><tr><td>Viewer</td><td>✓</td><td>✗</td><td>✗</td><td>✗</td><td>✗</td></tr><tr><td>Member</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td><td>✗</td></tr><tr><td>Admin</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✗</td></tr><tr><td>Owner</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td><td>✓</td></tr></tbody></table></div>
+<h3 id="accepting-an-invitation">Accepting an Invitation</h3>
+<p>Invited members receive an email with an accept link. The link expires after 7 days. If expired, ask the Admin to resend the invitation from <strong>Org Settings → Members → Reinvite</strong>.</p>
+<hr/>
+<h2 id="api-keys-webhooks">API Keys & Webhooks</h2>
+<p>Available on <strong>Pro</strong> and <strong>Enterprise</strong> plans.</p>
+<h3 id="generating-an-api-key">Generating an API Key</h3>
+<ol>
+<li>Go to <strong>Account → API Keys → Generate Key</strong>.</li>
+<li>Copy the key — it is shown only once.</li>
+<li>Store it securely (e.g., in your CI/CD secret store).</li>
+</ol>
+<p>Use the key via the <code>X-API-Key</code> header:</p>
+<pre><span class="code-lang">bash</span><code>curl -H "X-API-Key: dk_live_your_key_here" https://api.dockease.io/api/v1/jobs/</code></pre>
+<h3 id="webhooks">Webhooks</h3>
+<p>DockEase can POST a JSON payload to your endpoint when job events occur.</p>
+<ol>
+<li>Go to <strong>Account → Webhooks → Configure</strong>.</li>
+<li>Enter your <strong>HTTPS endpoint URL</strong>.</li>
+<li>Select events: <code>job.completed</code>, <code>job.failed</code>, <code>job.queued</code>.</li>
+<li>Click <strong>Save</strong>.</li>
+</ol>
+<p>Webhook payloads are signed with HMAC-SHA256 (signature in <code>X-DockEase-Signature</code> header).</p>
+<hr/>
+<h2 id="billing-subscription">Billing & Subscription</h2>
+<h3 id="subscription-tiers">Subscription Tiers</h3>
+<div class="table-wrap"><table><thead><tr><th>Plan</th><th>Jobs/Month</th><th>GPU Access</th><th>API Access</th><th>Price</th></tr></thead><tbody><tr><td>Free</td><td>5</td><td>No</td><td>No</td><td>₹0 / $0</td></tr><tr><td>Starter</td><td>50</td><td>No</td><td>No</td><td>₹999 / $12/mo</td></tr><tr><td>Pro</td><td>500</td><td>Yes</td><td>Yes</td><td>₹3,999 / $48/mo</td></tr><tr><td>Enterprise</td><td>Unlimited</td><td>Yes</td><td>Yes</td><td>Custom</td></tr></tbody></table></div>
+<h3 id="upgrading-your-plan">Upgrading Your Plan</h3>
+<ol>
+<li>Go to <strong>Account → Billing → Upgrade Plan</strong>.</li>
+<li>Select the desired tier.</li>
+<li>Complete checkout via Razorpay (India) or Stripe (International).</li>
+</ol>
+<h3 id="job-usage-rollover">Job Usage Rollover</h3>
+<p>Job quotas reset on the first day of each calendar month. Unused jobs do not roll over.</p>
+<hr/>
+<h2 id="tips-troubleshooting">Tips & Troubleshooting</h2>
+<h3 id="receptor-preparation-failed">Receptor Preparation Failed</h3>
+<p><strong>Symptom:</strong> Red error badge on receptor card.</p>
+<p><strong>Common causes and fixes:</strong></p>
+<ul>
+<li><strong>Non-standard residues not handled</strong>: Try uploading a cleaned PDB with only the protein chain (remove heteroatoms manually in PyMOL or Chimera, then re-upload)</li>
+<li><strong>File is actually PDBQT</strong>: If your file is already a PDBQT, rename it <code>.pdbqt</code> — DockEase will skip preparation and use it directly</li>
+<li><strong>Very large structure (>5000 residues)</strong>: Contact support; large multi-chain complexes may require manual preparation</li>
+</ul>
+<h3 id="docking-job-stuck-in-queued">Docking Job Stuck in "Queued"</h3>
+<p><strong>Cause:</strong> High queue load, especially for GPU jobs.</p>
+<p><strong>Actions:</strong></p>
+<ul>
+<li>GPU jobs (AutoDock-GPU, Uni-Dock) share a GPU queue. During peak hours, wait time may be 5–15 minutes.</li>
+<li>Switch to <strong>AutoDock Vina (CPU)</strong> for immediate processing if results are urgent.</li>
+<li>Enterprise customers have a dedicated GPU queue with guaranteed SLA.</li>
+</ul>
+<h3 id="results-look-unreasonable-very-high-or-very-low-scores">Results Look Unreasonable (Very High or Very Low Scores)</h3>
+<p><strong>Common causes:</strong></p>
+<ul>
+<li><strong>Box is too large</strong>: A 50 Å³ box gives the ligand too much freedom. Shrink to 20–25 Å on each side.</li>
+<li><strong>Box is misplaced</strong>: Verify the box center aligns with your intended binding site in the 3D viewer.</li>
+<li><strong>Ligand preparation issue</strong>: Check that the ligand has correct valences (no disconnected fragments, valid tautomers).</li>
+<li><strong>Receptor has missing atoms</strong>: Run binding site detection again and check the preparation log.</li>
+</ul>
+<h3 id="3d-viewer-not-loading">3D Viewer Not Loading</h3>
+<ul>
+<li>Ensure your browser supports WebGL (Chrome/Firefox/Edge on desktop recommended).</li>
+<li>Safari on iOS has limited WebGL support — use Chrome on mobile for 3D viewing.</li>
+<li>Clear your browser cache and reload.</li>
+</ul>
+<h3 id="websocket-disconnected-during-job">WebSocket Disconnected During Job</h3>
+<p>DockEase uses exponential backoff reconnection. If you see "Reconnecting..." in the job card, this is normal — the connection will re-establish within seconds. Job progress is never lost; it will be synced when reconnected.</p>
+<hr/>
+<h2 id="faq">FAQ</h2>
+<p><strong>Q: Can I use DockEase completely free?</strong></p>
+<p>A: Yes. The Free tier gives you 5 docking jobs per month with no credit card required. All core features including the 3D viewer and ADMET predictions are available on Free.</p>
+<p><strong>Q: How accurate are the docking scores?</strong></p>
+<p>A: AutoDock Vina scores correlate with experimental Ki values with R² ≈ 0.5–0.6 on standard benchmarks (CASF-2016). They are best used for <strong>rank-ordering</strong> compounds within a series, not for absolute binding affinity prediction. Use Score Calibration to establish a target-specific activity threshold.</p>
+<p><strong>Q: Is my data private?</strong></p>
+<p>A: Yes. Your receptor and ligand files, docking results, and ADMET data are private to your account by default. Files are stored encrypted at rest. We do not use your data to train models or share it with third parties. See our Privacy Policy for full details.</p>
+<p><strong>Q: Can I run docking offline?</strong></p>
+<p>A: DockEase is a cloud-native platform. For offline/on-premises deployment, contact us about our Enterprise On-Premises edition.</p>
+<p><strong>Q: What is the maximum number of ligands I can screen in one job?</strong></p>
+<p>A: Free/Starter: 100 ligands per job. Pro: 10,000 per job (Uni-Dock/GPU). Enterprise: 50,000+ per job.</p>
+<p><strong>Q: Do you support covalent docking?</strong></p>
+<p>A: Covalent docking via Smina with a covalent constraint is on our roadmap for Q3 2026.</p>
+<p><strong>Q: How do I cite DockEase in a publication?</strong></p>
+<p>A: Please cite: <em>DockEase: Cloud-Based Molecular Docking as a Service (2026). DockEase Inc. https://dockease.io</em>. A formal journal citation is forthcoming.</p>
+<p><strong>Q: Can I delete my account and all data?</strong></p>
+<p>A: Yes. Go to <strong>Account → Settings → Danger Zone → Delete Account</strong>. This permanently deletes all your data in accordance with GDPR Article 17 (Right to Erasure) within 30 days.</p>
+<p><strong>Q: Is Fragment Growing available on the Free tier?</strong></p>
+<p>A: Fragment Growing is available on <strong>Starter and above</strong>. Each Fragment Growing run consumes jobs from your monthly quota (1 run = up to 24 docking jobs).</p>
+<p><strong>Q: Why does score calibration require both actives AND inactives?</strong></p>
+<p>A: ROC analysis requires known positives and negatives. Without inactives, it is impossible to measure the false positive rate. Use property-matched decoys (DUD-E or DUDE-Z) for the most rigorous calibration.</p>
+<hr/>
+<p><em>For additional support, visit <a href="https://docs.dockease.io">docs.dockease.io</a> or contact <a href="mailto:support@dockease.io">support@dockease.io</a>.</em></p>
+<p><em>DockEase © 2026. All rights reserved.</em></p>
+    <div class="doc-footer">
+      <div class="brand">&#169; 2026 <strong>DockEase</strong> — Upload. Click. Discover.</div>
+      <div class="brand" style="font-size:11px;color:var(--text-faint);">Confidential · All rights reserved</div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

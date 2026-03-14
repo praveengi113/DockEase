@@ -1,0 +1,1687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DockEase — Upload. Click. Discover.</title>
+  <meta name="description" content="DockEase is a cloud-based molecular docking SaaS platform. Run AutoDock Vina, AutoDock-GPU, and Uni-Dock in your browser. No installation required." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0f;
+      --bg2: #0f0f1a;
+      --bg3: #13131f;
+      --border: rgba(99, 102, 241, 0.18);
+      --border2: rgba(255,255,255,0.07);
+      --indigo: #6366f1;
+      --indigo-light: #818cf8;
+      --violet: #8b5cf6;
+      --violet-light: #a78bfa;
+      --cyan: #22d3ee;
+      --text: #f1f5f9;
+      --text2: #94a3b8;
+      --text3: #64748b;
+      --card: rgba(15,15,28,0.85);
+      --card-border: rgba(99,102,241,0.2);
+      --glow: rgba(99,102,241,0.15);
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+
+    /* ─── SCROLLBAR ─────────────────────────── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--indigo); border-radius: 3px; }
+
+    /* ─── NAV ───────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 2rem;
+      height: 64px;
+      background: rgba(10,10,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border2);
+      transition: background 0.3s;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-logo-icon {
+      width: 32px; height: 32px;
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    .nav-cta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+      border: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text2);
+      border: 1px solid var(--border2);
+    }
+    .btn-ghost:hover { color: var(--text); border-color: var(--indigo); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      color: white;
+      box-shadow: 0 0 20px rgba(99,102,241,0.3);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 30px rgba(99,102,241,0.5);
+    }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--indigo-light);
+      border: 1px solid var(--indigo);
+    }
+    .btn-outline:hover {
+      background: rgba(99,102,241,0.1);
+      transform: translateY(-1px);
+    }
+
+    .btn-lg {
+      padding: 0.875rem 2rem;
+      font-size: 1rem;
+      border-radius: 10px;
+    }
+
+    /* ─── HERO ──────────────────────────────── */
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    #molecule-canvas {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      opacity: 0.7;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      max-width: 800px;
+      padding: 0 2rem;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(99,102,241,0.12);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 100px;
+      padding: 0.35rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--indigo-light);
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--indigo);
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.8); }
+    }
+
+    h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.04em;
+      margin-bottom: 1rem;
+    }
+
+    .gradient-text {
+      background: linear-gradient(135deg, var(--indigo-light), var(--violet-light), var(--cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-tagline {
+      font-size: clamp(1rem, 2.5vw, 1.35rem);
+      color: var(--text2);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+      font-weight: 400;
+      line-height: 1.7;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 3rem;
+    }
+
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-stat {
+      text-align: center;
+    }
+
+    .hero-stat-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--indigo-light), var(--violet-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-stat-label {
+      font-size: 0.8rem;
+      color: var(--text3);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
+    }
+
+    /* ─── SECTION SHARED ────────────────────── */
+    section {
+      padding: 6rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--indigo);
+      margin-bottom: 0.75rem;
+    }
+
+    h2 {
+      font-size: clamp(1.75rem, 4vw, 2.75rem);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+
+    .section-sub {
+      font-size: 1.1rem;
+      color: var(--text2);
+      max-width: 600px;
+      line-height: 1.7;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 4rem;
+    }
+
+    .section-header .section-sub { margin: 0 auto; }
+
+    /* ─── PROBLEM/SOLUTION ──────────────────── */
+    #problem {
+      background: linear-gradient(to bottom, var(--bg), var(--bg2));
+      max-width: 100%;
+      padding: 6rem 2rem;
+    }
+
+    #problem > .inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .comparison-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .comparison-card {
+      border-radius: 16px;
+      padding: 2.5rem;
+      border: 1px solid;
+    }
+
+    .comparison-card.old {
+      background: rgba(239,68,68,0.04);
+      border-color: rgba(239,68,68,0.2);
+    }
+
+    .comparison-card.new {
+      background: rgba(99,102,241,0.06);
+      border-color: rgba(99,102,241,0.3);
+      box-shadow: 0 0 40px rgba(99,102,241,0.08);
+    }
+
+    .comparison-card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .comparison-card.old h3 { color: #f87171; }
+    .comparison-card.new h3 { color: var(--indigo-light); }
+
+    .comparison-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      font-size: 0.9rem;
+    }
+
+    .comparison-item:last-child { border-bottom: none; }
+
+    .comparison-icon {
+      width: 20px; height: 20px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .comparison-item .label { color: var(--text2); }
+    .comparison-item .value { color: var(--text); font-weight: 500; font-size: 0.85rem; margin-top: 2px; }
+
+    /* ─── FEATURES ──────────────────────────── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--indigo), var(--violet));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(99,102,241,0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 30px rgba(99,102,241,0.1);
+    }
+
+    .feature-card:hover::before { opacity: 1; }
+
+    .feature-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 1.25rem;
+      background: rgba(99,102,241,0.1);
+      border: 1px solid rgba(99,102,241,0.2);
+    }
+
+    .feature-card h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .feature-card p {
+      font-size: 0.9rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ─── USP SECTION ───────────────────────── */
+    #usp {
+      max-width: 100%;
+      padding: 6rem 2rem;
+      background: linear-gradient(135deg, rgba(99,102,241,0.04), rgba(139,92,246,0.04));
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    #usp > .inner { max-width: 1200px; margin: 0 auto; }
+
+    .usp-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+
+    .usp-card {
+      background: rgba(10,10,20,0.8);
+      border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 20px;
+      padding: 2.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .usp-card::after {
+      content: '';
+      position: absolute;
+      top: -50%; right: -30%;
+      width: 60%;
+      padding-top: 60%;
+      background: radial-gradient(circle, rgba(99,102,241,0.08), transparent 70%);
+      pointer-events: none;
+    }
+
+    .industry-first {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      border-radius: 100px;
+      padding: 0.25rem 0.875rem;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: white;
+      margin-bottom: 1.25rem;
+    }
+
+    .usp-card h3 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+      letter-spacing: -0.02em;
+    }
+
+    .usp-card p {
+      color: var(--text2);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin-bottom: 1.5rem;
+    }
+
+    .usp-points {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .usp-points li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      color: var(--text2);
+    }
+
+    .usp-check {
+      width: 18px; height: 18px;
+      background: rgba(99,102,241,0.15);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+
+    /* ─── HOW IT WORKS ──────────────────────── */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      position: relative;
+    }
+
+    .steps-grid::before {
+      content: '';
+      position: absolute;
+      top: 2rem;
+      left: calc(12.5% + 1.5rem);
+      right: calc(12.5% + 1.5rem);
+      height: 2px;
+      background: linear-gradient(90deg, var(--indigo), var(--violet));
+      opacity: 0.3;
+    }
+
+    .step-card {
+      text-align: center;
+      padding: 2rem 1.5rem;
+    }
+
+    .step-number {
+      width: 56px; height: 56px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem;
+      font-weight: 900;
+      margin: 0 auto 1.25rem;
+      box-shadow: 0 0 20px rgba(99,102,241,0.3);
+    }
+
+    .step-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-card p {
+      font-size: 0.875rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    /* ─── PRICING ───────────────────────────── */
+    #pricing {
+      background: linear-gradient(to bottom, var(--bg2), var(--bg));
+      max-width: 100%;
+      padding: 6rem 2rem;
+    }
+
+    #pricing > .inner { max-width: 1200px; margin: 0 auto; }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .pricing-card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s;
+      position: relative;
+    }
+
+    .pricing-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+    }
+
+    .pricing-card.popular {
+      border-color: var(--indigo);
+      background: linear-gradient(to bottom, rgba(99,102,241,0.08), var(--card));
+      box-shadow: 0 0 40px rgba(99,102,241,0.15);
+    }
+
+    .popular-badge {
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--indigo), var(--violet));
+      color: white;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.3rem 1rem;
+      border-radius: 100px;
+      white-space: nowrap;
+    }
+
+    .pricing-plan {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--indigo-light);
+      margin-bottom: 0.75rem;
+    }
+
+    .pricing-price {
+      font-size: 2.5rem;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      line-height: 1;
+      margin-bottom: 0.25rem;
+    }
+
+    .pricing-price sup {
+      font-size: 1.25rem;
+      font-weight: 700;
+      vertical-align: super;
+    }
+
+    .pricing-period {
+      font-size: 0.8rem;
+      color: var(--text3);
+      margin-bottom: 1.5rem;
+    }
+
+    .pricing-divider {
+      height: 1px;
+      background: var(--border2);
+      margin-bottom: 1.5rem;
+    }
+
+    .pricing-features {
+      list-style: none;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .pricing-features li {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.875rem;
+      color: var(--text2);
+    }
+
+    .pricing-features li.included { color: var(--text); }
+
+    .pf-check {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      color: var(--indigo-light);
+    }
+
+    .pf-x {
+      width: 16px; height: 16px;
+      flex-shrink: 0;
+      color: var(--text3);
+      opacity: 0.5;
+    }
+
+    /* ─── COMPETITIVE TABLE ─────────────────── */
+    .compare-table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th {
+      padding: 1rem 1.5rem;
+      text-align: left;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text3);
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    th.ours { color: var(--indigo-light); background: rgba(99,102,241,0.06); }
+
+    td {
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      color: var(--text2);
+      vertical-align: middle;
+    }
+
+    td.ours {
+      background: rgba(99,102,241,0.04);
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: rgba(255,255,255,0.02); }
+    tr:hover td.ours { background: rgba(99,102,241,0.07); }
+
+    .check-yes { color: #34d399; }
+    .check-no { color: var(--text3); opacity: 0.5; }
+    .check-partial { color: #fbbf24; }
+
+    /* ─── FINAL CTA ─────────────────────────── */
+    #docs {
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    #docs .section-sub { max-width: 560px; }
+
+    #cta {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 6rem 2rem;
+    }
+
+    .cta-glow {
+      position: relative;
+      display: inline-block;
+    }
+
+    .cta-glow::before {
+      content: '';
+      position: absolute;
+      inset: -40px;
+      background: radial-gradient(ellipse, rgba(99,102,241,0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    #cta h2 { font-size: clamp(2rem, 5vw, 3.5rem); margin-bottom: 1.25rem; }
+    #cta p { color: var(--text2); font-size: 1.1rem; margin-bottom: 2.5rem; }
+
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    /* ─── FOOTER ────────────────────────────── */
+    footer {
+      background: var(--bg2);
+      border-top: 1px solid var(--border2);
+      padding: 3rem 2rem;
+    }
+
+    .footer-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 3rem;
+    }
+
+    .footer-brand p {
+      color: var(--text3);
+      font-size: 0.875rem;
+      line-height: 1.7;
+      margin-top: 0.75rem;
+      max-width: 280px;
+    }
+
+    .footer-col h4 {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 1rem;
+    }
+
+    .footer-col a {
+      display: block;
+      color: var(--text2);
+      text-decoration: none;
+      font-size: 0.875rem;
+      margin-bottom: 0.5rem;
+      transition: color 0.2s;
+    }
+
+    .footer-col a:hover { color: var(--indigo-light); }
+
+    .footer-bottom {
+      max-width: 1200px;
+      margin: 2rem auto 0;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-bottom p {
+      font-size: 0.8rem;
+      color: var(--text3);
+    }
+
+    /* ─── FADE-IN ANIMATION ─────────────────── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .fade-in-delay-1 { transition-delay: 0.1s; }
+    .fade-in-delay-2 { transition-delay: 0.2s; }
+    .fade-in-delay-3 { transition-delay: 0.3s; }
+    .fade-in-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── RESPONSIVE ────────────────────────── */
+    @media (max-width: 900px) {
+      .comparison-grid, .usp-grid, .pricing-grid, .steps-grid { grid-template-columns: 1fr 1fr; }
+      .footer-inner { grid-template-columns: 1fr 1fr; }
+      .steps-grid::before { display: none; }
+      nav .nav-links { display: none; }
+    }
+
+    @media (max-width: 600px) {
+      .comparison-grid, .usp-grid, .pricing-grid, .steps-grid { grid-template-columns: 1fr; }
+      .footer-inner { grid-template-columns: 1fr; }
+      h1 { font-size: 2.25rem; }
+    }
+
+    /* ─── GLOW DIVIDERS ─────────────────────── */
+    .glow-divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--indigo), var(--violet), transparent);
+      opacity: 0.3;
+      margin: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ─── NAVIGATION ─────────────────────────────────────────── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="3" fill="white"/>
+        <circle cx="4" cy="7" r="2" fill="white" opacity="0.8"/>
+        <circle cx="20" cy="7" r="2" fill="white" opacity="0.8"/>
+        <circle cx="4" cy="17" r="2" fill="white" opacity="0.8"/>
+        <circle cx="20" cy="17" r="2" fill="white" opacity="0.8"/>
+        <line x1="12" y1="12" x2="4" y2="7" stroke="white" stroke-width="1.5" opacity="0.5"/>
+        <line x1="12" y1="12" x2="20" y2="7" stroke="white" stroke-width="1.5" opacity="0.5"/>
+        <line x1="12" y1="12" x2="4" y2="17" stroke="white" stroke-width="1.5" opacity="0.5"/>
+        <line x1="12" y1="12" x2="20" y2="17" stroke="white" stroke-width="1.5" opacity="0.5"/>
+      </svg>
+    </div>
+    DockEase
+  </a>
+  <ul class="nav-links">
+    <li><a href="#features">Features</a></li>
+    <li><a href="#usp">Science</a></li>
+    <li><a href="#how-it-works">How It Works</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#docs">Docs</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn btn-ghost">Sign In</a>
+    <a href="#" class="btn btn-primary">Start Free</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ───────────────────────────────────────────────── -->
+<section id="hero">
+  <canvas id="molecule-canvas"></canvas>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      AutoDock as a Service
+    </div>
+    <h1>
+      Molecular Docking<br>
+      <span class="gradient-text">in Your Browser</span>
+    </h1>
+    <p class="hero-tagline">
+      Upload a receptor. Add your compounds. Launch a virtual screen. Get ranked binding affinities — no installation, no command line, no PhD in bioinformatics required.
+    </p>
+    <div class="hero-actions">
+      <a href="#" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+        Start Free — No Card Needed
+      </a>
+      <a href="#" class="btn btn-outline btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none"/></svg>
+        View Demo
+      </a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-value">4 Engines</div>
+        <div class="hero-stat-label">Vina · GPU · Uni-Dock · Smina</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">20 min</div>
+        <div class="hero-stat-label">From upload to ranked hits</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-value">₹0</div>
+        <div class="hero-stat-label">To get started today</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="glow-divider"></div>
+
+<!-- ─── PROBLEM / SOLUTION ─────────────────────────────────── -->
+<div id="problem">
+  <div class="inner">
+    <div class="section-header fade-in">
+      <span class="section-label">The Problem</span>
+      <h2>The Old Way Is Broken.<br><span class="gradient-text">We Fixed It.</span></h2>
+      <p class="section-sub">Molecular docking tools are powerful — but inaccessible. Two days of setup for a 20-minute calculation is not research. It's a barrier.</p>
+    </div>
+    <div class="comparison-grid">
+      <div class="comparison-card old fade-in fade-in-delay-1">
+        <h3>
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+          Traditional Approach
+        </h3>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <div>
+            <div class="label">Installation</div>
+            <div class="value">1–3 days on Linux. Conda environments. Broken dependencies.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <div>
+            <div class="label">Receptor Preparation</div>
+            <div class="value">2–4 hours of manual scripting with PDBFixer, MGLTools, OpenBabel.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <div>
+            <div class="label">Running Docking</div>
+            <div class="value">Shell scripts. HPC queue submission. Wait hours for results.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <div>
+            <div class="label">Visualisation</div>
+            <div class="value">Install PyMOL or Chimera. Load files manually. Parse PDBQT output.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+          <div>
+            <div class="label">Total Time</div>
+            <div class="value">2+ days before you see a single result.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="comparison-card new fade-in fade-in-delay-2">
+        <h3>
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-6"/></svg>
+          With DockEase
+        </h3>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M8 12l3 3 5-6"/><circle cx="12" cy="12" r="10"/></svg>
+          <div>
+            <div class="label">Installation</div>
+            <div class="value">None. Open your browser. Done.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M8 12l3 3 5-6"/><circle cx="12" cy="12" r="10"/></svg>
+          <div>
+            <div class="label">Receptor Preparation</div>
+            <div class="value">Upload PDB or enter a PDB ID. Auto-prepared in under 60 seconds.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M8 12l3 3 5-6"/><circle cx="12" cy="12" r="10"/></svg>
+          <div>
+            <div class="label">Running Docking</div>
+            <div class="value">Click Launch. Watch real-time progress. Results in minutes.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M8 12l3 3 5-6"/><circle cx="12" cy="12" r="10"/></svg>
+          <div>
+            <div class="label">Visualisation</div>
+            <div class="value">Integrated 3D NGL viewer. Click any pose. Instant.</div>
+          </div>
+        </div>
+        <div class="comparison-item">
+          <svg class="comparison-icon" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2"><path d="M8 12l3 3 5-6"/><circle cx="12" cy="12" r="10"/></svg>
+          <div>
+            <div class="label">Total Time</div>
+            <div class="value">20 minutes from zero to ranked hits.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="glow-divider"></div>
+
+<!-- ─── FEATURES ───────────────────────────────────────────── -->
+<section id="features">
+  <div class="section-header fade-in">
+    <span class="section-label">Capabilities</span>
+    <h2>Everything You Need<br><span class="gradient-text">In One Platform</span></h2>
+    <p class="section-sub">From receptor upload to ADMET prediction — DockEase is the only platform where the entire structure-based drug design workflow lives in a single browser tab.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card fade-in fade-in-delay-1">
+      <div class="feature-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </div>
+      <h3>Multi-Format Molecular Input</h3>
+      <p>Upload PDB, PDBQT, SDF, MOL2. Enter SMILES with live 2D preview. Import from RCSB PDB or PubChem by ID. Automatic 3D conformer generation for all inputs.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-2">
+      <div class="feature-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="4" r="2"/><circle cx="12" cy="20" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="20" cy="8" r="2"/><circle cx="4" cy="16" r="2"/><circle cx="20" cy="16" r="2"/><line x1="12" y1="12" x2="12" y2="6"/><line x1="12" y1="12" x2="5.6" y2="8.8"/><line x1="12" y1="12" x2="18.4" y2="8.8"/></svg>
+      </div>
+      <h3>4 Docking Engines</h3>
+      <p>AutoDock Vina (CPU, reliable), AutoDock-GPU (10–50× faster), Uni-Dock (GPU batch for tens of thousands of compounds), and Smina (custom scoring). Choose the right tool for each campaign.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-3">
+      <div class="feature-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <h3>Real-Time Progress Monitoring</h3>
+      <p>Live job updates via WebSocket — not email, not polling. Watch your virtual screen progress compound by compound with an ETA estimate. Automatic reconnection on network interruption.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-1">
+      <div class="feature-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18"/></svg>
+      </div>
+      <h3>Interactive 3D Results Viewer</h3>
+      <p>Click any docked pose to view it in the integrated NGL Viewer — right in the browser. Hydrogen bonds, hydrophobic contacts, and pi-stacking interactions are highlighted automatically.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-2">
+      <div class="feature-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M9 11H1l8 8-8-8"/><path d="M15 13h8l-8-8 8 8"/><path d="M12 2v20"/></svg>
+      </div>
+      <h3>Smart Binding Site Detection</h3>
+      <p>P2Rank computational pocket detection automatically finds and ranks binding sites on your receptor. Or define a custom box manually in the 3D viewer. Residue annotations included.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-3">
+      <div class="feature-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h3>ADMET Prediction</h3>
+      <p>One-click drug-likeness and safety profiling for any hit. Absorption, distribution, metabolism, excretion, and toxicity properties including hERG, AMES, BBB penetration, CYP inhibition, and Lipinski compliance.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── USP SECTION ────────────────────────────────────────── -->
+<div id="usp">
+  <div class="inner">
+    <div class="section-header fade-in">
+      <span class="section-label">Industry Firsts</span>
+      <h2>Two Features Nobody<br><span class="gradient-text">Else Has</span></h2>
+      <p class="section-sub">Score Calibration and Fragment Growing are unique to DockEase. They transform virtual screening from a hit-finding exercise into a complete lead optimisation workflow.</p>
+    </div>
+    <div class="usp-grid">
+      <div class="usp-card fade-in fade-in-delay-1">
+        <div class="industry-first">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Industry First
+        </div>
+        <h3>Score Calibration</h3>
+        <p>Raw docking scores are target-dependent. A −8 kcal/mol hit on EGFR means something completely different than −8 kcal/mol on a GPCR. Score Calibration uses your known actives and inactives to compute a statistically rigorous, target-specific hit threshold — complete with ROC curve and AUC analysis.</p>
+        <ul class="usp-points">
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            Upload known actives and inactives (DUD-E decoys supported)
+          </li>
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            Automatic ROC curve and AUC computation
+          </li>
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            Youden's J optimal threshold — maximises sensitivity + specificity
+          </li>
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            Apply threshold to auto-flag hits in any screening result
+          </li>
+        </ul>
+      </div>
+
+      <div class="usp-card fade-in fade-in-delay-2">
+        <div class="industry-first">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Industry First
+        </div>
+        <h3>Fragment Growing</h3>
+        <p>Turn a docked lead into a structure-activity relationship in one click. Pick any attachment atom on your best-scoring pose, and DockEase enumerates 24 medicinal chemistry fragments, docks all variants, and ranks them by ΔΔG improvement. Weeks of SAR exploration, automated in minutes.</p>
+        <ul class="usp-points">
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            24 standard medicinal chemistry R-groups enumerated automatically
+          </li>
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            All variants prepared and docked in a single batch job
+          </li>
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            Results ranked by ΔΔG relative to parent compound
+          </li>
+          <li>
+            <div class="usp-check"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+            Compare parent vs. variant poses in the 3D viewer side-by-side
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="glow-divider"></div>
+
+<!-- ─── HOW IT WORKS ───────────────────────────────────────── -->
+<section id="how-it-works">
+  <div class="section-header fade-in">
+    <span class="section-label">Workflow</span>
+    <h2>Four Steps to<br><span class="gradient-text">Your First Hit</span></h2>
+    <p class="section-sub">DockEase handles all the molecular preparation complexity in the background. You focus on the science.</p>
+  </div>
+  <div class="steps-grid">
+    <div class="step-card fade-in fade-in-delay-1">
+      <div class="step-number">1</div>
+      <h3>Upload Your Receptor</h3>
+      <p>Upload a PDB file or fetch directly from RCSB PDB by entering the 4-character code. DockEase auto-repairs missing residues, adds hydrogens, and prepares the PDBQT.</p>
+    </div>
+    <div class="step-card fade-in fade-in-delay-2">
+      <div class="step-number">2</div>
+      <h3>Add Ligands</h3>
+      <p>Upload an SDF library, paste SMILES strings, or import from PubChem. From single compound to 10,000-compound virtual libraries — all auto-prepared with RDKit and Meeko.</p>
+    </div>
+    <div class="step-card fade-in fade-in-delay-3">
+      <div class="step-number">3</div>
+      <h3>Configure and Launch</h3>
+      <p>Select a binding site (auto-detected or manually defined). Choose your docking engine. Set exhaustiveness. Click Launch. Watch real-time progress in the browser.</p>
+    </div>
+    <div class="step-card fade-in fade-in-delay-4">
+      <div class="step-number">4</div>
+      <h3>Analyse and Discover</h3>
+      <p>Sort and filter ranked poses in the interactive table. Visualise binding modes in 3D. Run ADMET predictions. Grow fragments. Export hits as CSV or SDF.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ────────────────────────────────────────────── -->
+<div id="pricing">
+  <div class="inner">
+    <div class="section-header fade-in">
+      <span class="section-label">Pricing</span>
+      <h2>Start Free.<br><span class="gradient-text">Scale as You Discover.</span></h2>
+      <p class="section-sub">No credit card required to get started. All tiers include the full feature set including the 3D viewer, ADMET, and CSV export.</p>
+    </div>
+    <div class="pricing-grid">
+      <!-- Free -->
+      <div class="pricing-card fade-in fade-in-delay-1">
+        <div class="pricing-plan">Free</div>
+        <div class="pricing-price">₹0</div>
+        <div class="pricing-period">forever</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>5 docking jobs / month</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>100 ligands per job</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>AutoDock Vina (CPU)</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>3D NGL Viewer</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>ADMET Predictions</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>CSV / SDF Export</li>
+          <li><svg class="pf-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span>GPU docking</span></li>
+          <li><svg class="pf-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span>API access</span></li>
+        </ul>
+        <a href="#" class="btn btn-ghost" style="text-align:center;width:100%;justify-content:center;">Get Started Free</a>
+      </div>
+
+      <!-- Starter -->
+      <div class="pricing-card fade-in fade-in-delay-2">
+        <div class="pricing-plan">Starter</div>
+        <div class="pricing-price"><sup>₹</sup>999</div>
+        <div class="pricing-period">per month · ~$12 USD</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>50 docking jobs / month</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>100 ligands per job</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>All 4 CPU engines</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Fragment Growing</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Score Calibration</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Priority queue</li>
+          <li><svg class="pf-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span>GPU docking</span></li>
+          <li><svg class="pf-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span>API access</span></li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="text-align:center;width:100%;justify-content:center;">Start Starter</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card popular fade-in fade-in-delay-3">
+        <div class="popular-badge">Most Popular</div>
+        <div class="pricing-plan">Pro</div>
+        <div class="pricing-price"><sup>₹</sup>3,999</div>
+        <div class="pricing-period">per month · ~$48 USD</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>500 docking jobs / month</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>10,000 ligands per job</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>GPU docking (AutoDock-GPU, Uni-Dock)</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Full REST API access</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Webhooks for job events</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Audit log</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>All USP features</li>
+          <li><svg class="pf-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg><span>Dedicated GPU queue</span></li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="text-align:center;width:100%;justify-content:center;">Start Pro</a>
+      </div>
+
+      <!-- Enterprise -->
+      <div class="pricing-card fade-in fade-in-delay-4">
+        <div class="pricing-plan">Enterprise</div>
+        <div class="pricing-price" style="font-size:2rem;">Custom</div>
+        <div class="pricing-period">contact us for pricing</div>
+        <div class="pricing-divider"></div>
+        <ul class="pricing-features">
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Unlimited docking jobs</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Unlimited ligands per job</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Dedicated GPU queue</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>SLA guarantees</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Organisation RBAC</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>On-premises option</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Dedicated support</li>
+          <li class="included"><svg class="pf-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>Custom integrations</li>
+        </ul>
+        <a href="#" class="btn btn-ghost" style="text-align:center;width:100%;justify-content:center;">Contact Sales</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="glow-divider"></div>
+
+<!-- ─── COMPETITIVE TABLE ──────────────────────────────────── -->
+<section id="compare">
+  <div class="section-header fade-in">
+    <span class="section-label">Competitive Analysis</span>
+    <h2>How We Stack Up<br><span class="gradient-text">Against the Alternatives</span></h2>
+    <p class="section-sub">Enterprise-grade features at a fraction of the cost. And two capabilities that no competitor offers at any price.</p>
+  </div>
+  <div class="compare-table-wrap fade-in">
+    <table>
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th class="ours">DockEase</th>
+          <th>Schrödinger Glide</th>
+          <th>SwissDock</th>
+          <th>DockThor</th>
+          <th>OpenEye FRED</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Browser-based, no installation</td>
+          <td class="ours"><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-partial">△ Partial</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-no">✗ No</span></td>
+        </tr>
+        <tr>
+          <td>Free tier available</td>
+          <td class="ours"><span class="check-yes">✓ 5 jobs/mo</span></td>
+          <td><span class="check-no">✗ $50K+/yr</span></td>
+          <td><span class="check-partial">△ No accounts</span></td>
+          <td><span class="check-partial">△ No accounts</span></td>
+          <td><span class="check-no">✗ $25K+/yr</span></td>
+        </tr>
+        <tr>
+          <td>User accounts & project management</td>
+          <td class="ours"><span class="check-yes">✓ Full RBAC</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td>GPU-accelerated batch docking</td>
+          <td class="ours"><span class="check-yes">✓ Pro+</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td>Real-time WebSocket progress</td>
+          <td class="ours"><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-partial">△ Polling</span></td>
+          <td><span class="check-no">✗ Email only</span></td>
+          <td><span class="check-no">✗ Email only</span></td>
+          <td><span class="check-partial">△ Polling</span></td>
+        </tr>
+        <tr>
+          <td>REST API access</td>
+          <td class="ours"><span class="check-yes">✓ Pro+</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-yes">✓ Yes</span></td>
+        </tr>
+        <tr>
+          <td>ADMET prediction integrated</td>
+          <td class="ours"><span class="check-yes">✓ All plans</span></td>
+          <td><span class="check-yes">✓ Add-on</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-partial">△ Separate tool</span></td>
+        </tr>
+        <tr>
+          <td><strong>Score Calibration (ROC/AUC)</strong></td>
+          <td class="ours"><span class="check-yes" style="font-weight:700;">✓ Unique to DockEase</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+        </tr>
+        <tr>
+          <td><strong>Fragment Growing (ΔΔG ranking)</strong></td>
+          <td class="ours"><span class="check-yes" style="font-weight:700;">✓ Unique to DockEase</span></td>
+          <td><span class="check-partial">△ Manual only</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+          <td><span class="check-no">✗ No</span></td>
+        </tr>
+        <tr>
+          <td>Entry price</td>
+          <td class="ours"><span class="check-yes" style="font-weight:700;">₹0 / $0</span></td>
+          <td><span style="color:#f87171;">$50,000+/yr</span></td>
+          <td><span class="check-partial">Free (limited)</span></td>
+          <td><span class="check-partial">Free (limited)</span></td>
+          <td><span style="color:#f87171;">$25,000+/yr</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── FINAL CTA ──────────────────────────────────────────── -->
+<section id="cta">
+  <div class="cta-glow fade-in">
+    <span class="section-label">Get Started</span>
+    <h2><span class="gradient-text">Upload. Click.<br>Discover.</span></h2>
+    <p>Join researchers at leading institutions and biotech companies using DockEase to accelerate their drug discovery programmes. Start free today.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn btn-primary btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg>
+        Create Free Account
+      </a>
+      <a href="#docs" class="btn btn-outline btn-lg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Read Documentation
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── DOCS ──────────────────────────────────────────────── -->
+<section id="docs">
+  <div class="section-inner fade-in" style="max-width:860px;margin:0 auto;">
+    <span class="section-label">Documentation</span>
+    <h2 class="section-title">Everything you need to<br><span class="gradient-text">get started fast</span></h2>
+    <p class="section-sub">Comprehensive guides and a full REST API reference — all written for researchers, not just engineers.</p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px;">
+
+      <!-- User Guide card -->
+      <a href="user-guide.html" target="_blank" rel="noopener"
+         style="display:block;text-decoration:none;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:28px 28px 24px;transition:border-color .2s,transform .2s,box-shadow .2s;"
+         onmouseover="this.style.borderColor='var(--indigo)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(99,102,241,.18)'"
+         onmouseout="this.style.borderColor='var(--card-border)';this.style.transform='none';this.style.boxShadow='none'">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M2 3h6a4 4 0 014 4v14a3 3 0 00-3-3H2z"/><path d="M22 3h-6a4 4 0 00-4 4v14a3 3 0 013-3h7z"/></svg>
+        </div>
+        <h3 style="font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:-.3px;">User Guide</h3>
+        <p style="font-size:.9rem;color:var(--text2);line-height:1.6;margin-bottom:16px;">Step-by-step walkthroughs for every feature — from uploading your first receptor to interpreting binding affinity results, ADMET predictions, and fragment growing.</p>
+        <span style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--indigo-light);">
+          Open guide
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </span>
+      </a>
+
+      <!-- API Reference card -->
+      <a href="api-reference.html" target="_blank" rel="noopener"
+         style="display:block;text-decoration:none;background:var(--card);border:1px solid var(--card-border);border-radius:16px;padding:28px 28px 24px;transition:border-color .2s,transform .2s,box-shadow .2s;"
+         onmouseover="this.style.borderColor='var(--violet)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 12px 32px rgba(139,92,246,.18)'"
+         onmouseout="this.style.borderColor='var(--card-border)';this.style.transform='none';this.style.boxShadow='none'">
+        <div style="width:44px;height:44px;border-radius:12px;background:linear-gradient(135deg,#8b5cf6,#06b6d4);display:flex;align-items:center;justify-content:center;margin-bottom:18px;">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </div>
+        <h3 style="font-size:1.15rem;font-weight:700;color:#fff;margin-bottom:8px;letter-spacing:-.3px;">API Reference</h3>
+        <p style="font-size:.9rem;color:var(--text2);line-height:1.6;margin-bottom:16px;">Full REST API specification with request/response schemas, authentication, rate limits, webhook payloads, and code examples for Python, cURL, and JavaScript.</p>
+        <span style="display:inline-flex;align-items:center;gap:6px;font-size:.82rem;font-weight:600;color:var(--violet-light);">
+          Open reference
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────── -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <a href="#" class="nav-logo" style="font-size:1.1rem;">
+        <div class="nav-logo-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="3" fill="white"/>
+            <circle cx="4" cy="7" r="2" fill="white" opacity="0.8"/>
+            <circle cx="20" cy="7" r="2" fill="white" opacity="0.8"/>
+            <circle cx="4" cy="17" r="2" fill="white" opacity="0.8"/>
+            <circle cx="20" cy="17" r="2" fill="white" opacity="0.8"/>
+            <line x1="12" y1="12" x2="4" y2="7" stroke="white" stroke-width="1.5" opacity="0.5"/>
+            <line x1="12" y1="12" x2="20" y2="7" stroke="white" stroke-width="1.5" opacity="0.5"/>
+            <line x1="12" y1="12" x2="4" y2="17" stroke="white" stroke-width="1.5" opacity="0.5"/>
+            <line x1="12" y1="12" x2="20" y2="17" stroke="white" stroke-width="1.5" opacity="0.5"/>
+          </svg>
+        </div>
+        DockEase
+      </a>
+      <p>AutoDock as a Service. Upload a protein. Add compounds. Get ranked binding affinities. No installation required. Built for researchers who want to do science, not sysadmin.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Product</h4>
+      <a href="#">Features</a>
+      <a href="#">Pricing</a>
+      <a href="#">Changelog</a>
+      <a href="#">Roadmap</a>
+      <a href="#">Status</a>
+    </div>
+    <div class="footer-col">
+      <h4>Developers</h4>
+      <a href="api-reference.html" target="_blank" rel="noopener">API Reference</a>
+      <a href="user-guide.html" target="_blank" rel="noopener">User Guide</a>
+      <a href="#docs">Documentation</a>
+      <a href="#">GitHub</a>
+      <a href="#">Webhooks</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Contact</a>
+      <a href="#">Privacy</a>
+      <a href="#">Terms</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 DockEase. All rights reserved. Made with caffeine and Python.</p>
+    <p style="color: var(--text3);">AutoDock Vina, AutoDock-GPU, and Uni-Dock are open-source projects used under their respective licenses.</p>
+  </div>
+</footer>
+
+<!-- ─── THREE.JS MOLECULE ──────────────────────────────────── -->
+<script>
+(function() {
+  const canvas = document.getElementById('molecule-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 18);
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0x404060, 0.8);
+  scene.add(ambientLight);
+
+  const light1 = new THREE.PointLight(0x6366f1, 3, 30);
+  light1.position.set(5, 8, 5);
+  scene.add(light1);
+
+  const light2 = new THREE.PointLight(0x8b5cf6, 2, 25);
+  light2.position.set(-6, -4, 3);
+  scene.add(light2);
+
+  const light3 = new THREE.PointLight(0x22d3ee, 1.5, 20);
+  light3.position.set(0, 0, 8);
+  scene.add(light3);
+
+  // Molecule definition — a caffeine-like small molecule arrangement
+  // Atoms: [x, y, z, element_type]
+  // 0=C (grey), 1=N (blue), 2=O (red), 3=C-aromatic (light)
+  const atomData = [
+    // Xanthine-like core (simplified)
+    [0,    0,    0,    'N'],  // 0 - central N
+    [1.4,  0.8,  0,    'C'],  // 1
+    [1.4, -0.8,  0,    'C'],  // 2
+    [-1.4, 0.8,  0,    'C'],  // 3
+    [-1.4,-0.8,  0,    'C'],  // 4
+    [0,    1.6,  0,    'N'],  // 5
+    [0,   -1.6,  0,    'C'],  // 6
+    [2.6,  0,    0.5,  'O'],  // 7
+    [-2.6, 0,    0.5,  'O'],  // 8
+    [0,    2.8,  0.5,  'C'],  // 9  - methyl
+    [0,   -2.8,  0.5,  'N'],  // 10 - methyl N
+    [1.2,  2.8,  1.2,  'C'],  // 11
+    [-1.2,-2.8,  1.2,  'C'],  // 12
+    [0,    0,    2.2,  'C'],  // 13 - out-of-plane
+    [1.0,  0.8,  2.8,  'C'],  // 14
+    [-1.0, 0.8,  2.8,  'N'],  // 15
+  ];
+
+  // Bond connectivity
+  const bonds = [
+    [0,1],[0,2],[0,3],[0,4],
+    [1,5],[1,7],[2,6],[2,7],
+    [3,5],[3,8],[4,6],[4,8],
+    [5,9],[6,10],[9,11],[10,12],
+    [0,13],[13,14],[13,15],[14,15]
+  ];
+
+  // Atom materials
+  const materials = {
+    N: new THREE.MeshPhongMaterial({ color: 0x818cf8, emissive: 0x3730a3, shininess: 90 }),
+    C: new THREE.MeshPhongMaterial({ color: 0x94a3b8, emissive: 0x1e293b, shininess: 80 }),
+    O: new THREE.MeshPhongMaterial({ color: 0xf472b6, emissive: 0x9d174d, shininess: 90 }),
+  };
+
+  const radii = { N: 0.35, C: 0.3, O: 0.33 };
+  const atomGroup = new THREE.Group();
+
+  // Create atom spheres
+  atomData.forEach(([x, y, z, type]) => {
+    const geo = new THREE.SphereGeometry(radii[type] || 0.3, 16, 16);
+    const mesh = new THREE.Mesh(geo, materials[type]);
+    mesh.position.set(x, y, z);
+    atomGroup.add(mesh);
+  });
+
+  // Create bond cylinders
+  const bondMat = new THREE.MeshPhongMaterial({ color: 0x64748b, emissive: 0x0f172a, shininess: 60, transparent: true, opacity: 0.7 });
+
+  bonds.forEach(([i, j]) => {
+    const [x1, y1, z1] = atomData[i];
+    const [x2, y2, z2] = atomData[j];
+    const start = new THREE.Vector3(x1, y1, z1);
+    const end = new THREE.Vector3(x2, y2, z2);
+    const dir = new THREE.Vector3().subVectors(end, start);
+    const length = dir.length();
+    const mid = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
+
+    const geo = new THREE.CylinderGeometry(0.07, 0.07, length, 8);
+    const mesh = new THREE.Mesh(geo, bondMat);
+    mesh.position.copy(mid);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+    atomGroup.add(mesh);
+  });
+
+  // Center the molecule
+  atomGroup.position.set(0, 0, 0);
+  scene.add(atomGroup);
+
+  // Outer glow shell (large sphere with emission)
+  const glowGeo = new THREE.SphereGeometry(6, 32, 32);
+  const glowMat = new THREE.MeshBasicMaterial({
+    color: 0x6366f1,
+    transparent: true,
+    opacity: 0.015,
+    side: THREE.BackSide,
+  });
+  scene.add(new THREE.Mesh(glowGeo, glowMat));
+
+  // Second, larger glow
+  const glow2Geo = new THREE.SphereGeometry(9, 32, 32);
+  const glow2Mat = new THREE.MeshBasicMaterial({
+    color: 0x8b5cf6,
+    transparent: true,
+    opacity: 0.008,
+    side: THREE.BackSide,
+  });
+  scene.add(new THREE.Mesh(glow2Geo, glow2Mat));
+
+  // Animation
+  let time = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    time += 0.008;
+    atomGroup.rotation.y = time * 0.5;
+    atomGroup.rotation.x = Math.sin(time * 0.3) * 0.15;
+    atomGroup.rotation.z = Math.cos(time * 0.2) * 0.1;
+
+    // Breathing light effect
+    light1.intensity = 3 + Math.sin(time * 1.5) * 0.8;
+    light2.intensity = 2 + Math.cos(time * 1.2) * 0.5;
+
+    renderer.render(scene, camera);
+  }
+
+  animate();
+
+  // Resize handler
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+})();
+</script>
+
+<!-- ─── INTERSECTION OBSERVER (fade-in) ───────────────────── -->
+<script>
+(function() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+})();
+</script>
+
+<!-- ─── NAVBAR SCROLL EFFECT ───────────────────────────────── -->
+<script>
+(function() {
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 60) {
+      navbar.style.background = 'rgba(10,10,15,0.97)';
+      navbar.style.boxShadow = '0 1px 30px rgba(0,0,0,0.5)';
+    } else {
+      navbar.style.background = 'rgba(10,10,15,0.85)';
+      navbar.style.boxShadow = 'none';
+    }
+  }, { passive: true });
+})();
+</script>
+
+</body>
+</html>
